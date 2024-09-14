@@ -12,4 +12,12 @@ public class MainController {
     public String main() {
         return "test!";
     }
+
+    @GetMapping("/signup")
+    @ResponseBody
+    public String signup() {
+        return "test!";
+    }
 }
+
+
