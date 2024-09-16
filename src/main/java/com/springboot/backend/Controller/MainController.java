@@ -23,7 +23,7 @@ public class MainController {
     public String signup() {
         Long userId;
 
-        return "test!";
+        return "signup";
     }
 }
 

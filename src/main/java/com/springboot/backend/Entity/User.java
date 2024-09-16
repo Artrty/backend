@@ -10,14 +10,23 @@ public class User {
 
     @Id // user_UUID
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long _id;
-    private String user_password;
+    private Long id;
+
+    private String password;
 
     public Long getId() {
-        return _id;
-    }
-    public String getPassword() {
-        return user_password;
+        return id;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
