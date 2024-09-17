@@ -1,23 +1,27 @@
 package com.springboot.backend.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import java.time.LocalDateTime;
 
 @Entity
 public class User {
 
-    @Id //기본키
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int uuid;
+    private int uuid; // 자동 생성되는 UUID (기본키)
 
-    private String name; // 사용자 이름
-    private String phoneNumber; // 휴대폰 번호 (id로 사용)
+    @Column(nullable = false, unique = true)
+    private String phoneNumber; // 사용자 전화번호 (고유한 값)
+
+    private String userName; // 사용자 이름
     private boolean phoneVerified; // 휴대폰 번호 확인 여부
     private String password; // 비밀번호
-    private String college; // 대학교 (선택사항)
 
+
+    @CreationTimestamp
+    @Column(updatable = false) // 생성 후에는 업데이트되지 않도록 설정
+    private LocalDateTime createdAt; // 계정 생성일 (자동 저장)
 
     // Getter, Setter
     public int getUuid() {
@@ -28,28 +32,20 @@ public class User {
         this.uuid = uuid;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public boolean isPhoneVerified() {
@@ -60,11 +56,17 @@ public class User {
         this.phoneVerified = phoneVerified;
     }
 
-    public String getCollege() {
-        return college;
+    public String getPassword() {
+        return password;
     }
 
-    public void setCollege(String college) {
-        this.college = college;
+    public void setPassword(String password) {
+        this.password = password;
     }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    // createdAt은 자동으로 설정되므로 setter는 제공하지 않음
 }

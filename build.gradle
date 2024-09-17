@@ -48,6 +48,9 @@ dependencies {
 
     // nurigo 문자인증
     implementation 'net.nurigo:sdk:4.2.7'
+
+    // redis - 인증번호 확인 (3분)
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.0.4'
 }
 
 tasks.named('test') {

@@ -1,7 +1,12 @@
 package com.springboot.backend.Controller;
 
+
+import com.springboot.backend.Entity.PhoneNumCertification;
 import com.springboot.backend.Entity.User;
+import com.springboot.backend.Repository.SmsCertification;
 import com.springboot.backend.Repository.UserRepository;
+import com.springboot.backend.Service.CoolSmsService;
+import com.springboot.backend.Service.SmsCertificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,17 +22,24 @@ import java.util.Map;
 @Controller
 public class MainController {
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CoolSmsService coolSmsService;
+
+    @Autowired
+    private SmsCertificationService smsCertificationService;
+
     @GetMapping("/")
     @ResponseBody
     public String main() {
         return "main";
     }
 
-    @Autowired
-    private UserRepository userRepository;
-
     private final RestTemplate restTemplate = new RestTemplate();
 
+    //로그인, 회원가입
     @PostMapping("/signup")
     @ResponseBody
     public String signup(@RequestBody User user) {
@@ -35,9 +47,15 @@ public class MainController {
         user.setPhoneVerified(false); // 휴대폰 확인 여부를 초기값으로 설정
         userRepository.save(user);
 
-        // SMS 전송 API 호출
+        // 인증번호 생성 및 저장
         String phoneNumber = user.getPhoneNumber();
-        String smsResponse = sendSms(phoneNumber);  // SmsController의 API를 호출
+        String smsResponse;
+        try {
+            String randomNumber = coolSmsService.sendSms(phoneNumber); // 인증번호 생성 및 SMS 전송
+            smsResponse = "인증번호가 SMS로 발송되었습니다.";
+        } catch (Exception e) {
+            smsResponse = "SMS 전송 실패: " + e.getMessage();
+        }
 
         return "----------사용자 정보 저장 성공!----------\n" + smsResponse;
     }
@@ -60,6 +78,17 @@ public class MainController {
         } catch (Exception e) {
             e.printStackTrace();
             return "SMS 전송 실패: " + e.getMessage();
+        }
+    }
+
+    // 인증번호 검증 로직
+    @PostMapping("/verify-sms")
+    @ResponseBody
+    public String verifySms(@RequestBody PhoneNumCertification certificationDto) {
+        try {
+            return smsCertificationService.verifySms(certificationDto);
+        } catch (IllegalArgumentException e) {
+            return "인증 실패: " + e.getMessage();
         }
     }
 }
