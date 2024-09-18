@@ -1,6 +1,5 @@
 package com.springboot.backend.Controller;
 
-
 import com.springboot.backend.Entity.PhoneNumCertification;
 import com.springboot.backend.Entity.User;
 import com.springboot.backend.Repository.SmsCertification;
@@ -60,35 +59,5 @@ public class MainController {
         return "----------사용자 정보 저장 성공!----------\n" + smsResponse;
     }
 
-    // RestTemplate을 사용하여 SMS API 호출
-    private String sendSms(String phoneNumber) {
-        String smsApiUrl = "http://localhost:8080/api/sms/send"; // SmsController의 URL
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-
-        Map<String, String> body = new HashMap<>();
-        body.put("phoneNumber", phoneNumber);
-
-        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(body, headers);
-
-        try {
-            ResponseEntity<String> response = restTemplate.exchange(smsApiUrl, HttpMethod.POST, requestEntity, String.class);
-            return response.getBody();  // 성공 시 SMS 컨트롤러에서 반환하는 메시지
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "SMS 전송 실패: " + e.getMessage();
-        }
-    }
-
-    // 인증번호 검증 로직
-    @PostMapping("/verify-sms")
-    @ResponseBody
-    public String verifySms(@RequestBody PhoneNumCertification certificationDto) {
-        try {
-            return smsCertificationService.verifySms(certificationDto);
-        } catch (IllegalArgumentException e) {
-            return "인증 실패: " + e.getMessage();
-        }
-    }
 }

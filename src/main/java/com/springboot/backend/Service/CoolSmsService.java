@@ -34,8 +34,8 @@ public class CoolSmsService {
             Message coolsms = new Message(apiKey, apiSecret);
 
             HashMap<String, String> params = new HashMap<>();
-            params.put("to", to);
-            params.put("from", fromPhoneNumber);
+            params.put("to", to);    // 수신 전화번호
+            params.put("from", fromPhoneNumber);    // 발신 전화번호
             params.put("type", "sms");
             params.put("text", "인증번호는 [" + numStr + "] 입니다.");
 

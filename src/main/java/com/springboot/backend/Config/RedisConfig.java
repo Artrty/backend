@@ -10,6 +10,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+// cmd 관리자 권한으로 실행 후 redis-server 입력
+
 @Configuration
 @RequiredArgsConstructor
 @EnableRedisRepositories

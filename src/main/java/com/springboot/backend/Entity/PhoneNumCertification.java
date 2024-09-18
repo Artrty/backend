@@ -14,7 +14,7 @@ public class PhoneNumCertification {
     private String phoneNumber; // 휴대전화 번호
 
     @Column(nullable = false)
-    private String randomNumber; // 인증번호
+    private String verifiedNumber; // 인증번호
 
     // Getter 및 Setter
     public Long getId() {
@@ -33,11 +33,11 @@ public class PhoneNumCertification {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getRandomNumber() {
-        return randomNumber;
+    public String getVerifiedNumber() {
+        return verifiedNumber;
     }
 
-    public void setRandomNumber(String randomNumber) {
-        this.randomNumber = randomNumber;
+    public void setVerifiedNumber(String verifiedNumber) {
+        this.verifiedNumber = verifiedNumber;
     }
 }
