@@ -14,7 +14,12 @@ public class PhoneNumCertification {
     private String phoneNumber; // 휴대전화 번호
 
     @Column(nullable = false)
-    private String verifiedNumber; // 인증번호
+    private String verifiedNumber; // 인증번호 (시스템)
+
+    @Column
+    private String  userVerifiedNumber; // 인증번호 (사용자 입력)
+    // => 시스템에서 보낸 인증번호와 사용자가 저장한 인증번호가 동일한 경우 User에 있는 phoneVerified의 값을 1로 변경 후 verfiedNumber와 userVerifiedNumber 값을 삭제
+    // => 만약 일치하지 않을 경우 userVerifiedNumber만 삭제
 
     // Getter 및 Setter
     public Long getId() {
@@ -39,5 +44,13 @@ public class PhoneNumCertification {
 
     public void setVerifiedNumber(String verifiedNumber) {
         this.verifiedNumber = verifiedNumber;
+    }
+
+    public String getUserVerifiedNumber() {
+        return userVerifiedNumber;
+    }
+
+    public void setUserVerifiedNumber(String userVerifiedNumber) {
+        this.userVerifiedNumber = userVerifiedNumber;
     }
 }

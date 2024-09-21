@@ -1,6 +1,7 @@
 package com.springboot.backend.Service;
 
-import com.springboot.backend.Repository.SmsCertification;
+import com.springboot.backend.Entity.PhoneNumCertification;
+import com.springboot.backend.Repository.PhoneNumCertificationRepository;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.java_sdk.api.Message;
 import net.nurigo.java_sdk.exceptions.CoolsmsException;
@@ -24,7 +25,7 @@ public class CoolSmsService {
     @Value("${coolsms.api.number}")
     private String fromPhoneNumber;
 
-    private final SmsCertification smsCertificationRepository;
+    private final PhoneNumCertificationRepository phoneNumCertificationRepository;
 
     public String sendSms(String to) throws CoolsmsException {
         try {
@@ -42,20 +43,20 @@ public class CoolSmsService {
             // 메시지 전송
             JSONObject response = coolsms.send(params);
 
-            // API 응답 로그
-            System.out.println("API Response: " + response.toString());
-
             // 성공 여부를 확인
             if (response.containsKey("success_count") && ((Long) response.get("success_count")) > 0) {
-                // Redis에 인증번호 저장
-                smsCertificationRepository.createSmsCertification(to, numStr);
+                // PhoneNumCertification에 인증번호 저장
+                PhoneNumCertification certification = new PhoneNumCertification();
+                certification.setPhoneNumber(to);
+                certification.setVerifiedNumber(numStr);
+                phoneNumCertificationRepository.save(certification);  // DB에 인증번호 저장
+
                 return numStr; // 생성된 인증번호 반환
             } else {
                 throw new CoolsmsException("Failed to send SMS: " + response.toString(), -1);
             }
 
         } catch (CoolsmsException e) {
-            System.err.println("CoolSmsException: " + e.getMessage());
             throw e;
         } catch (Exception e) {
             e.printStackTrace();
