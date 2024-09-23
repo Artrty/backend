@@ -2,6 +2,8 @@ package com.springboot.backend.Entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "sms_certification")
 public class PhoneNumCertification {
@@ -20,6 +22,11 @@ public class PhoneNumCertification {
     private String  userVerifiedNumber; // 인증번호 (사용자 입력)
     // => 시스템에서 보낸 인증번호와 사용자가 저장한 인증번호가 동일한 경우 User에 있는 phoneVerified의 값을 1로 변경 후 verfiedNumber와 userVerifiedNumber 값을 삭제
     // => 만약 일치하지 않을 경우 userVerifiedNumber만 삭제
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt; // 인증번호 생성 시간
+
+
 
     // Getter 및 Setter
     public Long getId() {
@@ -52,5 +59,13 @@ public class PhoneNumCertification {
 
     public void setUserVerifiedNumber(String userVerifiedNumber) {
         this.userVerifiedNumber = userVerifiedNumber;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

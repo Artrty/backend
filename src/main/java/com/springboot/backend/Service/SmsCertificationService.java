@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class SmsCertificationService {
@@ -23,6 +26,16 @@ public class SmsCertificationService {
 
         if (storedCertification == null) {
             throw new IllegalArgumentException("해당 번호의 인증 기록이 없습니다.");
+        }
+
+        // 현재 시간과 인증번호 생성 시간 비교
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime createdAt = storedCertification.getCreatedAt();
+
+        // 3분 이내에만 인증 가능
+        if (Duration.between(createdAt, now).toMinutes() > 3) {
+            // 유효 시간이 지났다면, 인증 실패 처리
+            return "인증번호의 유효 시간이 지났습니다.";
         }
 
         // 사용자가 입력한 인증번호 설정

@@ -43,13 +43,13 @@ public class SmsController {
             String result = smsCertificationService.verifySms(certificationDto);
 
             // 인증이 성공하면 특정 메시지를 반환
-            if ("SUCCESS".equals(result)) {
+            if ("인증 완료되었습니다.".equals(result)) {
                 return "----------인증번호 검증 완료!----------\n";
             } else {
                 return "인증 실패: " + result;
             }
         } catch (IllegalArgumentException e) {
-            return "인증 실패: " + e.getMessage();
+            return "인증 에러: " + e.getMessage();
         }
     }
 }

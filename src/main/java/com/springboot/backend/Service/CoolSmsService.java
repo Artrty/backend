@@ -9,6 +9,7 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -49,6 +50,8 @@ public class CoolSmsService {
                 PhoneNumCertification certification = new PhoneNumCertification();
                 certification.setPhoneNumber(to);
                 certification.setVerifiedNumber(numStr);
+                certification.setCreatedAt(LocalDateTime.now()); // 현재 시간 저장
+
                 phoneNumCertificationRepository.save(certification);  // DB에 인증번호 저장
 
                 return numStr; // 생성된 인증번호 반환
