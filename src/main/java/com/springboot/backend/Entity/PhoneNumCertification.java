@@ -26,8 +26,6 @@ public class PhoneNumCertification {
     @Column(nullable = false)
     private LocalDateTime createdAt; // 인증번호 생성 시간
 
-
-
     // Getter 및 Setter
     public Long getId() {
         return id;
