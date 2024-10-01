@@ -18,6 +18,7 @@ public class SmsCertificationService {
     private final PhoneNumCertificationRepository phoneNumCertificationRepository;
     private final UserRepository userRepository;
 
+
     // 인증 번호 검증
     @Transactional
     public String verifySms(PhoneNumCertification requestDto) {

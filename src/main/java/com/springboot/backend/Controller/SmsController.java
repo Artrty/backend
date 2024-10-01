@@ -6,10 +6,19 @@ import com.springboot.backend.Entity.User;
 import com.springboot.backend.Repository.UserRepository;
 import com.springboot.backend.Service.CoolSmsService;
 import com.springboot.backend.Service.SmsCertificationService;
-import net.nurigo.java_sdk.exceptions.CoolsmsException;
+import com.springboot.backend.jwt.JwtTokenProvider;
+import com.springboot.backend.jwt.TokenInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -24,6 +33,12 @@ public class SmsController {
 
     @Autowired
     private SmsCertificationService smsCertificationService;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder; // 비밀번호를 암호화하여 저장
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     // 회원가입
     @PostMapping("/signup")
@@ -73,27 +88,37 @@ public class SmsController {
     // 로그인
     @PostMapping("/signin")
     @ResponseBody
-    public String signin(@RequestBody Login loginRequest) {
+    public ResponseEntity<?> signin(@RequestBody Login loginRequest) {
         String phoneNumber = loginRequest.getPhoneNumber();
         String password = loginRequest.getPassword();
 
         // 사용자 정보 조회
         User user = userRepository.findByPhoneNumber(phoneNumber);
         if (user == null) {
-            return "사용자가 존재하지 않습니다.";
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("사용자가 존재하지 않습니다.");
         }
 
-        // 비밀번호 확인
-        if (!user.getPassword().equals(password)) {
-            return "비밀번호가 틀렸습니다.";
+        // 비밀번호 확인 (비밀번호는 암호화 - BCrypt로 비교)
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 틀렸습니다.");
         }
 
         // 전화번호 인증 여부 확인
         if (!user.isPhoneVerified()) {
-            return "휴대폰 인증이 완료되지 않았습니다.";
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("휴대폰 인증이 완료되지 않았습니다.");
         }
 
-        return "로그인 성공!";
+        // 로그인 성공 -> JWT 토큰 발급
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getPhoneNumber(), null, new ArrayList<>());
+        TokenInfo tokenInfo = jwtTokenProvider.createToken(authentication);
+
+        // 토큰과 성공 메시지를 반환
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "로그인 성공!");
+        response.put("token", tokenInfo.getAccessToken()); // 발급된 JWT 토큰 추가
+
+        return ResponseEntity.ok(response);
+
     }
 
 }

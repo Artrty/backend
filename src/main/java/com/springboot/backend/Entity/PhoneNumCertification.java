@@ -17,6 +17,7 @@ public class PhoneNumCertification {
 
     @Column(nullable = false)
     private String verifiedNumber; // 인증번호 (시스템)
+    // 인증번호  유효시간 경과 시 db에서 verifiedNumber를 빈 값으로 변경
 
     @Column
     private String  userVerifiedNumber; // 인증번호 (사용자 입력)
