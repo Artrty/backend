@@ -4,22 +4,13 @@ import com.springboot.backend.Entity.Login;
 import com.springboot.backend.Entity.PhoneNumCertification;
 import com.springboot.backend.Entity.User;
 import com.springboot.backend.Repository.UserRepository;
+import com.springboot.backend.Service.AuthService;
 import com.springboot.backend.Service.CoolSmsService;
 import com.springboot.backend.Service.SmsCertificationService;
-import com.springboot.backend.jwt.JwtTokenProvider;
-import com.springboot.backend.jwt.TokenInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -38,7 +29,7 @@ public class SmsController {
     private BCryptPasswordEncoder passwordEncoder; // 비밀번호를 암호화하여 저장
 
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private AuthService authService;
 
     // 회원가입
     @PostMapping("/signup")
@@ -50,7 +41,14 @@ public class SmsController {
             return "이미 존재하는 사용자입니다.";
         }
 
+        // 입력 받은 비밀번호를 암호화
+        String encryptedPassword = passwordEncoder.encode(user.getPassword());  // 'signupRequest' 대신 'user'로 수정
+
+        // 암호화된 비밀번호 콘솔 출력
+        System.out.println("암호화된 비밀번호: " + encryptedPassword); // 암호화된 비밀번호 출력
+
         // 사용자 정보를 받아서 저장
+        user.setPassword(encryptedPassword);  // 암호화된 비밀번호 저장
         user.setPhoneVerified(false); // 휴대폰 인증 여부를 초기값으로 설정
         userRepository.save(user);
 
@@ -64,7 +62,7 @@ public class SmsController {
             smsResponse = "SMS 전송 실패: " + e.getMessage();
         }
 
-        return "---------- 사용자 정보 저장 성공! ----------" + smsResponse;
+        return "---------- 사용자 정보 저장 성공! ---------- \n" + smsResponse;
     }
 
     // 인증번호 검증 엔드포인트
@@ -87,38 +85,8 @@ public class SmsController {
 
     // 로그인
     @PostMapping("/signin")
-    @ResponseBody
     public ResponseEntity<?> signin(@RequestBody Login loginRequest) {
-        String phoneNumber = loginRequest.getPhoneNumber();
-        String password = loginRequest.getPassword();
-
-        // 사용자 정보 조회
-        User user = userRepository.findByPhoneNumber(phoneNumber);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("사용자가 존재하지 않습니다.");
-        }
-
-        // 비밀번호 확인 (비밀번호는 암호화 - BCrypt로 비교)
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 틀렸습니다.");
-        }
-
-        // 전화번호 인증 여부 확인
-        if (!user.isPhoneVerified()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("휴대폰 인증이 완료되지 않았습니다.");
-        }
-
-        // 로그인 성공 -> JWT 토큰 발급
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getPhoneNumber(), null, new ArrayList<>());
-        TokenInfo tokenInfo = jwtTokenProvider.createToken(authentication);
-
-        // 토큰과 성공 메시지를 반환
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "로그인 성공!");
-        response.put("token", tokenInfo.getAccessToken()); // 발급된 JWT 토큰 추가
-
-        return ResponseEntity.ok(response);
-
+        return authService.signin(loginRequest);
     }
 
 }

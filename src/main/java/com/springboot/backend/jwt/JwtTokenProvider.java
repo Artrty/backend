@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-
 import javax.crypto.SecretKey;
 import java.util.Arrays;
 import java.util.Collection;
@@ -49,71 +48,53 @@ public class JwtTokenProvider {
         String jwt = Jwts.builder()
                 .subject(authentication.getName())
                 .claim("auth", authorities)
-                .claim("userId", ((CustomUser) authentication.getPrincipal()).getUserId())
+                .claim("userId", ((CustomUser) authentication.getPrincipal()).getUserId()) // CustomUser에서 userId 추출
                 .issuedAt(now)
-                .expiration(accessExpiration)
-                .signWith(getKey(), Jwts.SIG.HS256)
-                .signWith(SignatureAlgorithm.HS512, "123123")
+                .setExpiration(accessExpiration)
+                .signWith(getKey(), SignatureAlgorithm.HS256)  // signWith 수정
                 .compact();
 
         return new TokenInfo("Bearer", jwt);
     }
 
-
-    //jwt token 정보 추출
+    // jwt token에서 Authentication 정보 추출
     public Authentication getAuthentication(String jwt) {
         Claims claims = getClaims(jwt);
 
+        // 'auth' claim에서 권한 정보를 추출
         String auth = Optional.ofNullable(claims.get("auth", String.class))
                 .orElseThrow(() -> new RuntimeException("잘못된 토큰입니다."));
-        Long userId = Optional.ofNullable(claims.get("userId", Long.class))
+
+        // 'userId' claim에서 userId 정보를 추출 (int로 변환)
+        int userId = Optional.ofNullable(claims.get("userId", Integer.class)) // Integer로 변경
                 .orElseThrow(() -> new RuntimeException("잘못된 토큰입니다."));
 
+        // 권한 정보를 SimpleGrantedAuthority 객체로 변환
         Collection<GrantedAuthority> authorities = Arrays.stream(auth.split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
-        UserDetails principal = new CustomUser(userId, claims.getSubject(), "", authorities);
+        // CustomUser 객체 생성
+        UserDetails principal = new CustomUser(userId, claims.getSubject(), "", authorities); // userId를 int로 전달
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
-
-
     // token 검증
     public boolean validateToken(String token) {
         try {
             getClaims(token);
             return true;
-        } catch (Exception e) {
-
-            if (e instanceof SecurityException) {
-                log.debug("[SecurityException] 잘못된 토큰");
-                throw new JwtException("[SecurityException] 잘못된 토큰입니다.");
-            } else if (e instanceof MalformedJwtException) {
-                log.debug("[MalformedJwtException] 잘못된 토큰");
-                throw new JwtException("[MalformedJwtException] 잘못된 토큰입니다.");
-            } else if (e instanceof ExpiredJwtException) {
-                log.debug("[ExpiredJwtException] 토큰 만료");
-                throw new JwtException("[ExpiredJwtException] 토큰 만료");
-            } else if (e instanceof UnsupportedJwtException) {
-                log.debug("[UnsupportedJwtException] 잘못된 형식의 토큰");
-                throw new JwtException("[UnsupportedJwtException] 잘못된 형식의 토큰");
-            } else if (e instanceof IllegalArgumentException) {
-                log.debug("[IllegalArgumentException]");
-                throw new JwtException("[IllegalArgumentException]");
-            } else {
-                log.debug("[토큰검증 오류]" + e.getClass());
-                throw new JwtException("[토큰검증 오류] 미처리 토큰 오류");
-            }
+        } catch (JwtException | IllegalArgumentException e) {
+            log.debug("JWT token 검증 실패: {}", e.getMessage());
+            throw new JwtException("잘못된 토큰입니다.");
         }
     }
 
     private Claims getClaims(String jwt) {
+        // JWT 토큰을 파싱하여 claims를 추출
         return Jwts.parser()
-                .verifyWith(getKey())
+                .setSigningKey(getKey())
                 .build()
-                .parseSignedClaims(jwt)
-                .getPayload();
+                .parseClaimsJws(jwt)
+                .getBody();
     }
-
 }
-
