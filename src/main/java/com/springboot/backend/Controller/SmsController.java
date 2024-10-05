@@ -50,18 +50,25 @@ public class SmsController {
         // 사용자 정보를 받아서 저장
         user.setPassword(encryptedPassword);  // 암호화된 비밀번호 저장
         user.setPhoneVerified(false); // 휴대폰 인증 여부를 초기값으로 설정
+        
+        // 사용자 이름 저장
+        if (user.getUserName() == null || user.getUserName().isEmpty()) {
+            return "사용자 이름을 입력하세요.";
+        }
+
         userRepository.save(user);
 
         // 인증번호 생성 및 저장
         String phoneNumber = user.getPhoneNumber();
         String smsResponse;
         try {
-            String randomNumber = coolSmsService.sendSms(phoneNumber); // 인증번호 생성 및 SMS 전송
+            String randomNumber = coolSmsService.sendSms(user.getPhoneNumber());
             smsResponse = "인증번호가 SMS로 발송되었습니다.";
         } catch (Exception e) {
             smsResponse = "SMS 전송 실패: " + e.getMessage();
         }
 
+        System.out.println("UserName: " + user.getUserName());
         return "---------- 사용자 정보 저장 성공! ---------- \n" + smsResponse;
     }
 

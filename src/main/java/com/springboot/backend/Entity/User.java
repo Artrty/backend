@@ -10,26 +10,29 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int uuid; // 자동 생성되는 UUID (기본키)
+    private Long uuid; // 기본키
 
     @Column(nullable = false, unique = true)
-    private String phoneNumber; // 사용자 전화번호 (고유한 값)
+    private String phoneNumber;
 
+    @Column(nullable = false)
     private String userName; // 사용자 이름
-    private boolean phoneVerified; // 휴대폰 번호 확인 여부
-    private String password; // 비밀번호
 
+    private boolean phoneVerified; // 휴대폰 번호 확인 여부
+
+    @Column(nullable = false)
+    private String password; // 비밀번호
 
     @CreationTimestamp
     @Column(updatable = false) // 생성 후에는 업데이트되지 않도록 설정
     private LocalDateTime createdAt; // 계정 생성일 (자동 저장)
 
     // Getter, Setter
-    public int getUuid() {
+    public Long getUuid() {
         return uuid;
     }
 
-    public void setUuid(int uuid) {
+    public void setUuid(Long uuid) {
         this.uuid = uuid;
     }
 

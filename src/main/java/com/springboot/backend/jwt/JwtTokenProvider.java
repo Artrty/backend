@@ -40,22 +40,30 @@ public class JwtTokenProvider {
 
     // jwt token 생성
     public TokenInfo createToken(Authentication authentication) {
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
+        // Authentication 객체에서 CustomUser를 가져옴
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+
+        // 사용자 권한 추출
+        String authorities = customUser.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        // 토큰 생성
         Date now = new Date();
-        Date accessExpiration = new Date(now.getTime() + EXPIRATION_TIME);
+        Date expiration = new Date(now.getTime() + EXPIRATION_TIME);
 
         String jwt = Jwts.builder()
-                .subject(authentication.getName())
+                .setSubject(customUser.getUsername())
                 .claim("auth", authorities)
-                .claim("userId", ((CustomUser) authentication.getPrincipal()).getUserId()) // CustomUser에서 userId 추출
-                .issuedAt(now)
-                .setExpiration(accessExpiration)
-                .signWith(getKey(), SignatureAlgorithm.HS256)  // signWith 수정
+                .claim("userId", customUser.getUserId())  // CustomUser의 userId 사용
+                .setIssuedAt(now)
+                .setExpiration(expiration)
+                .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
 
         return new TokenInfo("Bearer", jwt);
     }
+
 
     // jwt token에서 Authentication 정보 추출
     public Authentication getAuthentication(String jwt) {
@@ -65,8 +73,8 @@ public class JwtTokenProvider {
         String auth = Optional.ofNullable(claims.get("auth", String.class))
                 .orElseThrow(() -> new RuntimeException("잘못된 토큰입니다."));
 
-        // 'userId' claim에서 userId 정보를 추출 (int로 변환)
-        int userId = Optional.ofNullable(claims.get("userId", Integer.class)) // Integer로 변경
+        // 'userId' claim에서 userId 정보를 추출
+        Long userId = Optional.ofNullable(claims.get("userId", Long.class))
                 .orElseThrow(() -> new RuntimeException("잘못된 토큰입니다."));
 
         // 권한 정보를 SimpleGrantedAuthority 객체로 변환
@@ -75,9 +83,10 @@ public class JwtTokenProvider {
                 .collect(Collectors.toList());
 
         // CustomUser 객체 생성
-        UserDetails principal = new CustomUser(userId, claims.getSubject(), "", authorities); // userId를 int로 전달
+        UserDetails principal = new CustomUser(userId, claims.getSubject(), "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
+
     // token 검증
     public boolean validateToken(String token) {
         try {

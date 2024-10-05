@@ -3,6 +3,7 @@ package com.springboot.backend.Service;
 import com.springboot.backend.Entity.Login;
 import com.springboot.backend.Entity.User;
 import com.springboot.backend.Repository.UserRepository;
+import com.springboot.backend.jwt.CustomUser;
 import com.springboot.backend.jwt.JwtTokenProvider;
 import com.springboot.backend.jwt.TokenInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
-//로그인
 @Service
 public class AuthService {
 
@@ -28,6 +28,7 @@ public class AuthService {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    // 로그인 메서드
     public ResponseEntity<?> signin(Login loginRequest) {
         String phoneNumber = loginRequest.getPhoneNumber();
         String password = loginRequest.getPassword();
@@ -53,8 +54,13 @@ public class AuthService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("휴대폰 인증이 완료되지 않았습니다.");
         }
 
-        // 로그인 성공 -> JWT 토큰 발급
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getPhoneNumber(), null, new ArrayList<>());
+        // 로그인 성공 -> CustomUser 객체 생성
+        CustomUser customUser = new CustomUser(user.getUuid(), user.getPhoneNumber(), user.getPassword(), new ArrayList<>()); // 빈 권한 리스트 전달
+
+        // Authentication 객체 생성
+        Authentication authentication = new UsernamePasswordAuthenticationToken(customUser, null, new ArrayList<>()); // 권한 없이 빈 리스트
+
+        // JWT 토큰 발급
         TokenInfo tokenInfo = jwtTokenProvider.createToken(authentication);
 
         return ResponseEntity.ok(new AuthResponse("로그인 성공!", tokenInfo.getAccessToken()));

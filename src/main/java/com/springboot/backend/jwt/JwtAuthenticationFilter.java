@@ -25,7 +25,10 @@ public class JwtAuthenticationFilter extends GenericFilter {
         String token = resolveToken((HttpServletRequest) request);
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
+            // 토큰에서 Authentication 정보 추출
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
+
+            // SecurityContext에 설정
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         chain.doFilter(request, response);
