@@ -17,6 +17,7 @@ public class PhoneNumCertification {
 
     @Column(nullable = false)
     private String verifiedNumber; // 인증번호 (시스템)
+    // 인증번호  유효시간 경과 시 db에서 verifiedNumber를 빈 값으로 변경
 
     @Column
     private String  userVerifiedNumber; // 인증번호 (사용자 입력)
@@ -25,6 +26,17 @@ public class PhoneNumCertification {
 
     @Column(nullable = false)
     private LocalDateTime createdAt; // 인증번호 생성 시간
+
+    // 인증번호를 빈 값으로 변경
+    public void clearVerifiedNumber() {
+        this.verifiedNumber = "";
+    }
+
+    // 새로운 인증번호 재발급
+    public void regenerateVerifiedNumber(String newVerifiedNumber) {
+        this.verifiedNumber = newVerifiedNumber;
+        this.createdAt = LocalDateTime.now(); // 재발급 시 생성 시간 업데이트
+    }
 
     // Getter 및 Setter
     public Long getId() {
