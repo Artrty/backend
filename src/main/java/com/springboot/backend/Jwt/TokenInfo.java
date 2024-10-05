@@ -1,4 +1,4 @@
-package com.springboot.backend.jwt;
+package com.springboot.backend.Jwt;
 
 import lombok.Data;
 

@@ -2,7 +2,7 @@ package com.springboot.backend.Service;
 
 import com.springboot.backend.Entity.User;
 import com.springboot.backend.Repository.UserRepository;
-import com.springboot.backend.jwt.CustomUser;
+import com.springboot.backend.Jwt.CustomUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,4 +1,4 @@
-package com.springboot.backend.jwt;
+package com.springboot.backend.Jwt;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

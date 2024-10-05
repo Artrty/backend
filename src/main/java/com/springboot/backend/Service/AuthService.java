@@ -3,9 +3,10 @@ package com.springboot.backend.Service;
 import com.springboot.backend.Entity.Login;
 import com.springboot.backend.Entity.User;
 import com.springboot.backend.Repository.UserRepository;
-import com.springboot.backend.jwt.CustomUser;
-import com.springboot.backend.jwt.JwtTokenProvider;
-import com.springboot.backend.jwt.TokenInfo;
+import com.springboot.backend.Response.AuthResponse;
+import com.springboot.backend.Jwt.CustomUser;
+import com.springboot.backend.Jwt.JwtTokenProvider;
+import com.springboot.backend.Jwt.TokenInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,14 +20,19 @@ import java.util.ArrayList;
 @Service
 public class AuthService {
 
+    private final JwtTokenProvider jwtTokenProvider;
+
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    public AuthService(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
     // 로그인 메서드
     public ResponseEntity<?> signin(Login loginRequest) {
