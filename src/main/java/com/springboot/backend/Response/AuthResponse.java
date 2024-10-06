@@ -1,4 +1,4 @@
-package com.springboot.backend.Service;
+package com.springboot.backend.Response;
 
 public class AuthResponse {
     private String message;
