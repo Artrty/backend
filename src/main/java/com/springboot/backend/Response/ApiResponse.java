@@ -24,9 +24,9 @@ public class ApiResponse<T> {
     private T data; // 데이터 목록 - success일 경우 실제 전송될 데이터 / fail일 경우 
     private String message; // error일 경우 예외 메세지 응답
 
-    // 응답 성공 시 데이터를 포함한 응답 생성
-    public static <T> ApiResponse<T> successResponse(T data) {
-        return new ApiResponse<>(SUCCESS_STATUS, data, null);
+    // 응답 성공 시 데이터, 성공 메세지를 포함한 응답 생성
+    public static <T> ApiResponse<T> successResponse(T data, String message ) {
+        return new ApiResponse<>(SUCCESS_STATUS, data, message);
     }
 
     // 응답이 성공했으나 반환할 데이터가 없는 경우
