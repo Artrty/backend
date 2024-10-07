@@ -2,7 +2,9 @@ package com.springboot.backend.Controller;
 
 import com.springboot.backend.Entity.User;
 import com.springboot.backend.Repository.UserRepository;
+import com.springboot.backend.Response.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,9 +17,11 @@ public class UserController {
     // 전화번호로 유저 존재 여부 확인
     @GetMapping("/{phoneNumber}/valid")
     @ResponseBody
-    public boolean isUserExists(@PathVariable String phoneNumber) {
+    public ResponseEntity<ApiResponse<?>> isUserExists(@PathVariable String phoneNumber) {
         // User가 존재하는지 확인
         User user = userRepository.findByPhoneNumber(phoneNumber);
-        return user != null; // 유저가 존재하면 true, 없으면 false 반환
+        boolean exists = user != null; // 유저가 존재하면 true, 없으면 false 반환
+
+        return ResponseEntity.ok(ApiResponse.successResponse(exists, exists ? "사용자의 정보가 존재합니다." : "사용자의 정보가 존재하지 않습니다."));
     }
 }

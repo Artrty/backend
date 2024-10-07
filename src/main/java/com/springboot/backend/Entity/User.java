@@ -1,6 +1,7 @@
 package com.springboot.backend.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
@@ -12,14 +13,18 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long uuid; // 기본키
 
+    @NotBlank(message = "휴대폰 번호는 필수 항목입니다.")
     @Column(nullable = false, unique = true)
     private String phoneNumber;
 
+
+    @NotBlank(message = "사용자 이름은 필수 항목입니다.")
     @Column(nullable = false)
     private String userName; // 사용자 이름
 
     private boolean phoneVerified; // 휴대폰 번호 확인 여부
 
+    @NotBlank(message = "비밀번호는 필수 항목입니다.")
     @Column(nullable = false)
     private String password; // 비밀번호
 

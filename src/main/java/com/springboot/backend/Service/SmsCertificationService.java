@@ -39,7 +39,7 @@ public class SmsCertificationService {
             storedCertification.clearVerifiedNumber();
             phoneNumCertificationRepository.save(storedCertification);
 
-            return "인증번호의 유효 시간이 지났습니다. \n 인증번호를 재발급 받으세요.";
+            return "인증번호의 유효 시간이 지났습니다. 인증번호를 재발급 받으세요.";
         }
 
         // 사용자가 입력한 인증번호 설정

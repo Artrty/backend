@@ -46,11 +46,6 @@ public class SmsController {
             return ResponseEntity.badRequest().body(ApiResponse.errorResponse("이미 존재하는 사용자입니다."));
         }
 
-        // 사용자 이름 확인
-        if (user.getUserName() == null || user.getUserName().isEmpty()) {
-            return ResponseEntity.badRequest().body(ApiResponse.errorResponse("사용자 이름을 입력하세요."));
-        }
-
         // 입력 받은 비밀번호를 암호화
         String encryptedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encryptedPassword);// 암호화된 비밀번호 저장
@@ -93,6 +88,14 @@ public class SmsController {
 
             // 인증 성공
             if ("인증 완료되었습니다.".equals(result)) {
+                // 인증 성공한 사용자의 정보를 가져옴
+                User user = userRepository.findByPhoneNumber(certificationDto.getPhoneNumber());
+
+                if (user != null) {
+                    // 사용자 정보를 data에 추가, 비밀번호는 제거
+                    data.put("user", sanitizeUser(user));
+                }
+
                 return ResponseEntity.ok(ApiResponse.successResponse(data, "인증번호 검증 완료!"));
             } else {
                 // 인증 실패
