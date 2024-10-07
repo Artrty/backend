@@ -39,9 +39,8 @@ public class SmsController {
     // 인증번호 발송
     @GetMapping("/{phoneNumber}/send-sms")
     @ResponseBody
-    public ResponseEntity<ApiResponse<?>> sendSms(@PathVariable String phoneNumber)) {
+    public ResponseEntity<ApiResponse<?>> sendSms(@PathVariable String phoneNumber) {
         // SMS 인증번호 발송
-        String smsResponse;
         try {
             String randomNumber = coolSmsService.sendSms(user.getPhoneNumber());
             return ResponseEntity.ok(ApiResponse.successWithNoContent());
