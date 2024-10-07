@@ -36,6 +36,20 @@ public class SmsController {
     @Autowired
     private AuthService authService;
 
+    // 인증번호 발송
+    @GetMapping("/{phoneNumber}/send-sms")
+    @ResponseBody
+    public ResponseEntity<ApiResponse<?>> sendSms(@PathVariable String phoneNumber)) {
+        // SMS 인증번호 발송
+        String smsResponse;
+        try {
+            String randomNumber = coolSmsService.sendSms(user.getPhoneNumber());
+            return ResponseEntity.ok(ApiResponse.successWithNoContent());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.errorResponse("SMS 전송 실패: " + e.getMessage()));
+        }
+    }
+
     // 회원가입
     @PostMapping("/signup")
     @ResponseBody
@@ -54,21 +68,12 @@ public class SmsController {
         // 사용자 정보 저장
         userRepository.save(user);
 
-        // SMS 인증번호 발송
-        String smsResponse;
-        try {
-            String randomNumber = coolSmsService.sendSms(user.getPhoneNumber());
-            smsResponse = "인증번호가 SMS로 발송되었습니다.";
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.errorResponse("SMS 전송 실패: " + e.getMessage()));
-        }
-
         // 사용자 정보와 메시지를 나누어 응답
         Map<String, Object> data = new HashMap<>();
         data.put("user", sanitizeUser(user)); // 민감한 정보 제거
 
         // 회원가입 성공 응답
-        return ResponseEntity.ok(ApiResponse.successResponse(data, "사용자 정보 저장 성공! " + smsResponse));
+        return ResponseEntity.ok(ApiResponse.successResponse(data, "사용자 정보 저장 성공! "));
     }
 
     // 비밀번호를 포함한 민감한 정보를 제거한 User 객체 반환
