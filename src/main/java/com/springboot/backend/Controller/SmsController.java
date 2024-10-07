@@ -42,7 +42,7 @@ public class SmsController {
     public ResponseEntity<ApiResponse<?>> sendSms(@PathVariable String phoneNumber) {
         // SMS 인증번호 발송
         try {
-            String randomNumber = coolSmsService.sendSms(user.getPhoneNumber());
+            String randomNumber = coolSmsService.sendSms(phoneNumber);
             return ResponseEntity.ok(ApiResponse.successWithNoContent());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.errorResponse("SMS 전송 실패: " + e.getMessage()));
