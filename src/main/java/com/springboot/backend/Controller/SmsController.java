@@ -52,6 +52,36 @@ public class SmsController {
         }
     }
 
+    // 인증번호 검증 엔드포인트
+    @PostMapping("/verify-sms")
+    public ResponseEntity<ApiResponse<?>> verifySms(@RequestBody PhoneNumCertification certificationDto) {
+        System.out.println("인증번호 검증 엔드포인트");
+        try {
+            // SMS 인증 로직 실행
+            String result = smsCertificationService.verifySms(certificationDto);
+
+            Map<String, Object> data = new HashMap<>();
+
+            // 인증 성공
+            if ("인증 완료되었습니다.".equals(result)) {
+                // 인증 성공한 사용자의 정보를 가져옴
+                User user = userRepository.findByPhoneNumber(certificationDto.getPhoneNumber());
+
+                if (user != null) {
+                    // 사용자 정보를 data에 추가, 비밀번호는 제거
+                    data.put("user", sanitizeUser(user));
+                }
+
+                return ResponseEntity.ok(ApiResponse.successResponse(data, "인증번호 검증 완료!"));
+            } else {
+                // 인증 실패
+                return ResponseEntity.badRequest().body(ApiResponse.errorResponse("인증 실패: " + result));
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.errorResponse("인증 에러: " + e.getMessage()));
+        }
+    }
+
     // 회원가입
     @PostMapping("/signup")
     @ResponseBody
@@ -83,36 +113,6 @@ public class SmsController {
     private User sanitizeUser(User user) {
         user.setPassword(null); // 비밀번호는 null로 설정하여 제외
         return user;
-    }
-
-    // 인증번호 검증 엔드포인트
-    @PostMapping("/verify-sms")
-    public ResponseEntity<ApiResponse<?>> verifySms(@RequestBody PhoneNumCertification certificationDto) {
-        System.out.println("인증번호 검증 엔드포인트");
-        try {
-            // SMS 인증 로직 실행
-            String result = smsCertificationService.verifySms(certificationDto);
-
-            Map<String, Object> data = new HashMap<>();
-
-            // 인증 성공
-            if ("인증 완료되었습니다.".equals(result)) {
-                // 인증 성공한 사용자의 정보를 가져옴
-                User user = userRepository.findByPhoneNumber(certificationDto.getPhoneNumber());
-
-                if (user != null) {
-                    // 사용자 정보를 data에 추가, 비밀번호는 제거
-                    data.put("user", sanitizeUser(user));
-                }
-
-                return ResponseEntity.ok(ApiResponse.successResponse(data, "인증번호 검증 완료!"));
-            } else {
-                // 인증 실패
-                return ResponseEntity.badRequest().body(ApiResponse.errorResponse("인증 실패: " + result));
-            }
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.errorResponse("인증 에러: " + e.getMessage()));
-        }
     }
 
     // 로그인

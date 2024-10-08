@@ -50,12 +50,12 @@ public class SmsCertificationService {
         if (storedCertification.getVerifiedNumber().equals(storedCertification.getUserVerifiedNumber())) {
             // 인증 성공: User의 phoneVerified를 true로 변경
             User user = userRepository.findByPhoneNumber(requestDto.getPhoneNumber());
-            if (user != null) {
-                user.setPhoneVerified(true); // 휴대폰 인증 완료
-                userRepository.save(user); // 변경사항 저장
-            } else {
-                throw new IllegalArgumentException("해당 번호의 사용자를 찾을 수 없습니다.");
-            }
+//            if (user != null) {
+//                user.setPhoneVerified(true); // 휴대폰 인증 완료
+//                userRepository.save(user); // 변경사항 저장
+//            } else {
+//                throw new IllegalArgumentException("해당 번호의 사용자를 찾을 수 없습니다.");
+//            }
 
             // 인증이 완료되었으므로 PhoneNumCertification에서 인증 기록 삭제
             phoneNumCertificationRepository.deleteByPhoneNumber(requestDto.getPhoneNumber());
@@ -65,7 +65,7 @@ public class SmsCertificationService {
             // 인증번호가 일치하지 않을 경우 userVerifiedNumber만 삭제
             storedCertification.setUserVerifiedNumber(null);
             phoneNumCertificationRepository.save(storedCertification);
-            
+
             return "인증번호가 일치하지 않습니다.";
         }
     }
