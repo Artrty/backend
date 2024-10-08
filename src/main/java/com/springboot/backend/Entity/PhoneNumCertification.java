@@ -12,7 +12,7 @@ public class PhoneNumCertification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 엔티티의 고유 ID
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String phoneNumber; // 휴대전화 번호
 
     @Column(nullable = false)
