@@ -23,8 +23,10 @@ public class SmsCertificationService {
     @Transactional
     public String verifySms(PhoneNumCertification requestDto) {
         System.out.println("인증번호 검증");
-        // DB에 저장된 인증번호 가져오기
-        PhoneNumCertification storedCertification = phoneNumCertificationRepository.findByPhoneNumber(requestDto.getPhoneNumber());
+
+        // 최근에 발급받은 인증번호 가져오기
+        PhoneNumCertification storedCertification = phoneNumCertificationRepository
+                .findFirstByPhoneNumberOrderByCreatedAtDesc(requestDto.getPhoneNumber());
 
         if (storedCertification == null) {
             throw new IllegalArgumentException("해당 번호의 인증 기록이 없습니다.");
@@ -38,11 +40,10 @@ public class SmsCertificationService {
         if (Duration.between(createdAt, now).toMinutes() > 3) {
             // 유효 시간이 지났다면, 해당 phoneNumber가 있는 데이터를 삭제
             phoneNumCertificationRepository.deleteByPhoneNumber(requestDto.getPhoneNumber());
-
             return "인증번호의 유효 시간이 지났습니다. 인증번호를 재발급 받으세요.";
         }
 
-        // 사용자가 입력한 인증번호 설정
+        // 사용자가 입력한 인증번호 검증
         storedCertification.setUserVerifiedNumber(requestDto.getUserVerifiedNumber());
 
         // 인증번호 비교
@@ -51,20 +52,20 @@ public class SmsCertificationService {
             User user = userRepository.findByPhoneNumber(requestDto.getPhoneNumber());
             if (user != null) {
                 user.setPhoneVerified(true); // 휴대폰 인증 완료
-                userRepository.save(user);  // 변경사항 저장
+                userRepository.save(user); // 변경사항 저장
             } else {
                 throw new IllegalArgumentException("해당 번호의 사용자를 찾을 수 없습니다.");
             }
 
             // 인증이 완료되었으므로 PhoneNumCertification에서 인증 기록 삭제
-            phoneNumCertificationRepository.delete(storedCertification);
+            phoneNumCertificationRepository.deleteByPhoneNumber(requestDto.getPhoneNumber());
 
             return "인증 완료되었습니다.";
         } else {
             // 인증번호가 일치하지 않을 경우 userVerifiedNumber만 삭제
             storedCertification.setUserVerifiedNumber(null);
             phoneNumCertificationRepository.save(storedCertification);
-
+            
             return "인증번호가 일치하지 않습니다.";
         }
     }

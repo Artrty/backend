@@ -44,13 +44,14 @@ public class CoolSmsService {
             // 메시지 전송
             JSONObject response = coolsms.send(params);
 
-            // 성공 여부를 확인
             if (response.containsKey("success_count") && ((Long) response.get("success_count")) > 0) {
-                // PhoneNumCertification에 인증번호 저장
+                System.out.println("기존에 발송된 인증번호 무효화(새로운 인증번호만 인증 가능)");
+
+                // 새로운 인증번호 저장
                 PhoneNumCertification certification = new PhoneNumCertification();
                 certification.setPhoneNumber(to);
                 certification.setVerifiedNumber(numStr);
-                certification.setCreatedAt(LocalDateTime.now()); // 현재 시간 저장
+                certification.setCreatedAt(LocalDateTime.now());
 
                 phoneNumCertificationRepository.save(certification);  // DB에 인증번호 저장
 
@@ -58,7 +59,6 @@ public class CoolSmsService {
             } else {
                 throw new CoolsmsException("Failed to send SMS: " + response.toString(), -1);
             }
-
         } catch (CoolsmsException e) {
             throw e;
         } catch (Exception e) {
