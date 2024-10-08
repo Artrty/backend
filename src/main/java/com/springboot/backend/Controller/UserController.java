@@ -18,6 +18,7 @@ public class UserController {
     @GetMapping("/{phoneNumber}/valid")
     @ResponseBody
     public ResponseEntity<ApiResponse<?>> isUserExists(@PathVariable String phoneNumber) {
+        System.out.println("전화번호를 통한 사용자 존재 확인");
         // User가 존재하는지 확인
         User user = userRepository.findByPhoneNumber(phoneNumber);
         boolean exists = user != null; // 유저가 존재하면 true, 없으면 false 반환

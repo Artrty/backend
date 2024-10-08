@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PhoneNumCertificationRepository extends JpaRepository<PhoneNumCertification, Long> {
     PhoneNumCertification findByPhoneNumber(String phoneNumber);
+    void deleteByPhoneNumber(String phoneNumber);
 }

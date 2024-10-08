@@ -19,9 +19,10 @@ public class SmsCertificationService {
     private final UserRepository userRepository;
 
 
-    // 인증 번호 검증
+    // 인증번호 검증
     @Transactional
     public String verifySms(PhoneNumCertification requestDto) {
+        System.out.println("인증번호 검증");
         // DB에 저장된 인증번호 가져오기
         PhoneNumCertification storedCertification = phoneNumCertificationRepository.findByPhoneNumber(requestDto.getPhoneNumber());
 
@@ -35,9 +36,8 @@ public class SmsCertificationService {
 
         // 3분 이내에만 인증 가능
         if (Duration.between(createdAt, now).toMinutes() > 3) {
-            // 유효 시간이 지났다면, 인증번호를 빈 값으로 설정
-            storedCertification.clearVerifiedNumber();
-            phoneNumCertificationRepository.save(storedCertification);
+            // 유효 시간이 지났다면, 해당 phoneNumber가 있는 데이터를 삭제
+            phoneNumCertificationRepository.deleteByPhoneNumber(requestDto.getPhoneNumber());
 
             return "인증번호의 유효 시간이 지났습니다. 인증번호를 재발급 받으세요.";
         }

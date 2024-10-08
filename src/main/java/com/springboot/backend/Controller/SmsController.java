@@ -40,9 +40,12 @@ public class SmsController {
     @GetMapping("/{phoneNumber}/send-sms")
     @ResponseBody
     public ResponseEntity<ApiResponse<?>> sendSms(@PathVariable String phoneNumber) {
+        System.out.println("SMS 인증번호 발송 시도: " + phoneNumber);
+
         // SMS 인증번호 발송
         try {
             String randomNumber = coolSmsService.sendSms(phoneNumber);
+            System.out.println("SMS 인증번호 발송 성공: " + randomNumber);
             return ResponseEntity.ok(ApiResponse.successWithNoContent());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.errorResponse("SMS 전송 실패: " + e.getMessage()));
@@ -53,6 +56,7 @@ public class SmsController {
     @PostMapping("/signup")
     @ResponseBody
     public ResponseEntity<ApiResponse<?>> signup(@RequestBody User user) {
+        System.out.println("회원가입 진행");
         // 전화번호로 유저가 이미 존재하는지 확인
         User existingUser = userRepository.findByPhoneNumber(user.getPhoneNumber());
         if (existingUser != null) {
@@ -84,6 +88,7 @@ public class SmsController {
     // 인증번호 검증 엔드포인트
     @PostMapping("/verify-sms")
     public ResponseEntity<ApiResponse<?>> verifySms(@RequestBody PhoneNumCertification certificationDto) {
+        System.out.println("인증번호 검증 엔드포인트");
         try {
             // SMS 인증 로직 실행
             String result = smsCertificationService.verifySms(certificationDto);
@@ -113,6 +118,7 @@ public class SmsController {
     // 로그인
     @PostMapping("/signin")
     public ResponseEntity<ApiResponse<?>> signin(@RequestBody Login loginRequest) {
+        System.out.println("로그인 진행");
         ResponseEntity<?> authResponse = authService.signin(loginRequest);
 
         Map<String, Object> data = new HashMap<>();

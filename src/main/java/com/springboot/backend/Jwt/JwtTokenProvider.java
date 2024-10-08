@@ -15,10 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import javax.crypto.SecretKey;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,7 +26,6 @@ public class JwtTokenProvider {
     private final String secretKey;
     private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24; // token 만료 1일
 
-    // 생성자
     public JwtTokenProvider(@Value("${springboot.jwt.secret}") String secretKey) {
         this.secretKey = secretKey;
     }
@@ -40,6 +36,7 @@ public class JwtTokenProvider {
 
     // jwt token 생성
     public TokenInfo createToken(Authentication authentication) {
+        System.out.println("jwt token 생성");
         // Authentication 객체에서 CustomUser를 가져옴
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
 
@@ -55,11 +52,14 @@ public class JwtTokenProvider {
         String jwt = Jwts.builder()
                 .setSubject(customUser.getUsername())
                 .claim("auth", authorities)
-                .claim("userId", customUser.getUserId())  // CustomUser의 userId 사용
+                .claim("userId", customUser.getUserId())
                 .setIssuedAt(now)
                 .setExpiration(expiration)
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
+
+        // JWT 생성 로그
+        logger.info("Generated JWT: {}", jwt);
 
         return new TokenInfo("Bearer", jwt);
     }
@@ -67,6 +67,7 @@ public class JwtTokenProvider {
 
     // jwt token에서 Authentication 정보 추출
     public Authentication getAuthentication(String jwt) {
+        System.out.println("jwt token에서 Authentication 정보 추출");
         Claims claims = getClaims(jwt);
 
         // 'auth' claim에서 권한 정보를 추출
@@ -89,8 +90,10 @@ public class JwtTokenProvider {
 
     // token 검증
     public boolean validateToken(String token) {
+        System.out.println("token 검증");
         try {
             getClaims(token);
+            logger.info("JWT token이 유효하지 않음.");
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             log.debug("JWT token 검증 실패: {}", e.getMessage());

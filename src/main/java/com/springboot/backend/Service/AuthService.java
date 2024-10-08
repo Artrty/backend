@@ -36,6 +36,7 @@ public class AuthService {
 
     // 로그인 메서드
     public ResponseEntity<?> signin(Login loginRequest) {
+        System.out.println("로그인 - 사용자 정보 조회");
         String phoneNumber = loginRequest.getPhoneNumber();
         String password = loginRequest.getPassword();
 
