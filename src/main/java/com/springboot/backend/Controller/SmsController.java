@@ -5,6 +5,8 @@ import com.springboot.backend.Entity.PhoneNumCertification;
 import com.springboot.backend.Entity.User;
 import com.springboot.backend.Repository.UserRepository;
 import com.springboot.backend.Response.ApiResponse;
+import com.springboot.backend.Response.ErrorCode;
+import com.springboot.backend.Response.SuccessCode;
 import com.springboot.backend.Service.AuthService;
 import com.springboot.backend.Service.CoolSmsService;
 import com.springboot.backend.Service.SmsCertificationService;
@@ -46,9 +48,10 @@ public class SmsController {
         try {
             String randomNumber = coolSmsService.sendSms(phoneNumber);
             System.out.println("SMS 인증번호 발송 성공: " + randomNumber);
-            return ResponseEntity.ok(ApiResponse.successWithNoContent());
+            return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.SmsSendSuccess, null));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.errorResponse("SMS 전송 실패: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.errorResponse(ErrorCode.SmsSendException));
         }
     }
 
@@ -72,13 +75,15 @@ public class SmsController {
                     data.put("user", sanitizeUser(user));
                 }
 
-                return ResponseEntity.ok(ApiResponse.successResponse(data, "인증번호 검증 완료!"));
+                return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.SmsVerificationSuccess, data));
             } else {
                 // 인증 실패
-                return ResponseEntity.badRequest().body(ApiResponse.errorResponse("인증 실패: " + result));
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.errorResponse(ErrorCode.SmsVerificationException));
             }
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(ApiResponse.errorResponse("인증 에러: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.errorResponse(ErrorCode.SmsServerException));
         }
     }
 
@@ -90,7 +95,8 @@ public class SmsController {
         // 전화번호로 유저가 이미 존재하는지 확인
         User existingUser = userRepository.findByPhoneNumber(user.getPhoneNumber());
         if (existingUser != null) {
-            return ResponseEntity.badRequest().body(ApiResponse.errorResponse("이미 존재하는 사용자입니다."));
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.errorResponse(ErrorCode.UserExistsException));
         }
 
         // 입력 받은 비밀번호를 암호화
@@ -106,7 +112,7 @@ public class SmsController {
         data.put("user", sanitizeUser(user)); // 민감한 정보 제거
 
         // 회원가입 성공 응답
-        return ResponseEntity.ok(ApiResponse.successResponse(data, "사용자 정보 저장 성공! "));
+        return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.SignupSuccess, data));
     }
 
     // 비밀번호를 포함한 민감한 정보를 제거한 User 객체 반환
@@ -124,14 +130,13 @@ public class SmsController {
         Map<String, Object> data = new HashMap<>();
 
         // authResponse.getBody()를 String으로 변환하여 메시지로 사용
-        String message = authResponse.getBody() != null ? authResponse.getBody().toString() : "로그인 성공";
+//        String message = authResponse.getBody() != null ? authResponse.getBody().toString() : "로그인 성공";
 
         if (authResponse.getStatusCode() == HttpStatus.OK) { // 로그인 성공
-            return ResponseEntity.ok(ApiResponse.successResponse(data, message));
+            return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.SigninSuccess, data));
         } else { // 로그인 실패
             return ResponseEntity.status(authResponse.getStatusCode())
-                    .body(ApiResponse.errorResponse("로그인 실패"));
+                    .body(ApiResponse.errorResponse(ErrorCode.LoginException));
         }
     }
-
 }

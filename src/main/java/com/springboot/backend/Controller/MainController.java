@@ -22,6 +22,4 @@ public class MainController {
     public String main() {
         return "main";
     }
-
-    private final RestTemplate restTemplate = new RestTemplate();
 }

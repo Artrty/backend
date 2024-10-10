@@ -44,18 +44,9 @@ public class SmsCertificationService {
         }
 
         // 사용자가 입력한 인증번호 검증
-        storedCertification.setUserVerifiedNumber(requestDto.getUserVerifiedNumber());
-
-        // 인증번호 비교
-        if (storedCertification.getVerifiedNumber().equals(storedCertification.getUserVerifiedNumber())) {
+        if (storedCertification.getVerifiedNumber().equals(requestDto.getUserVerifiedNumber())) {
             // 인증 성공: User의 phoneVerified를 true로 변경
             User user = userRepository.findByPhoneNumber(requestDto.getPhoneNumber());
-//            if (user != null) {
-//                user.setPhoneVerified(true); // 휴대폰 인증 완료
-//                userRepository.save(user); // 변경사항 저장
-//            } else {
-//                throw new IllegalArgumentException("해당 번호의 사용자를 찾을 수 없습니다.");
-//            }
 
             // 인증이 완료되었으므로 PhoneNumCertification에서 인증 기록 삭제
             phoneNumCertificationRepository.deleteByPhoneNumber(requestDto.getPhoneNumber());
