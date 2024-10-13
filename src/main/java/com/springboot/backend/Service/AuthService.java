@@ -2,20 +2,20 @@ package com.springboot.backend.Service;
 
 import com.springboot.backend.Entity.Login;
 import com.springboot.backend.Entity.User;
-import com.springboot.backend.Repository.UserRepository;
-import com.springboot.backend.Response.AuthResponse;
 import com.springboot.backend.Jwt.CustomUser;
 import com.springboot.backend.Jwt.JwtTokenProvider;
-import com.springboot.backend.Jwt.TokenInfo;
+import com.springboot.backend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 @Service
 public class AuthService {
@@ -28,14 +28,13 @@ public class AuthService {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
-
     @Autowired
     public AuthService(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
     // 로그인 메서드
-    public ResponseEntity<?> signin(Login loginRequest) {
+    public Authentication signin(Login loginRequest) {
         System.out.println("로그인 - 사용자 정보 조회");
         String phoneNumber = loginRequest.getPhoneNumber();
         String password = loginRequest.getPassword();
@@ -43,7 +42,7 @@ public class AuthService {
         // 사용자 정보 조회
         User user = userRepository.findByPhoneNumber(phoneNumber);
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("사용자가 존재하지 않습니다.");
+            throw new RuntimeException("사용자를 찾을 수 없습니다.");
         }
 
         // 비밀번호 확인 (비밀번호는 암호화 - BCrypt로 비교)
@@ -53,23 +52,17 @@ public class AuthService {
         System.out.println("비밀번호 일치 여부: " + passwordMatch);
 
         if (!passwordMatch) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 틀렸습니다.");
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 전화번호 인증 여부 확인
-        if (!user.isPhoneVerified()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("휴대폰 인증이 완료되지 않았습니다.");
-        }
-
-        // 로그인 성공 -> CustomUser 객체 생성
-        CustomUser customUser = new CustomUser(user.getUuid(), user.getPhoneNumber(), user.getPassword(), new ArrayList<>()); // 빈 권한 리스트 전달
+        // CustomUser 객체 생성
+        CustomUser customUser = new CustomUser(user.getUuid(), user.getPhoneNumber(), user.getPassword(), getAuthorities(user));
 
         // Authentication 객체 생성
-        Authentication authentication = new UsernamePasswordAuthenticationToken(customUser, null, new ArrayList<>()); // 권한 없이 빈 리스트
+        return new UsernamePasswordAuthenticationToken(customUser, null, customUser.getAuthorities());
+    }
 
-        // JWT 토큰 발급
-        TokenInfo tokenInfo = jwtTokenProvider.createToken(authentication);
-
-        return ResponseEntity.ok(new AuthResponse("로그인 성공!", tokenInfo.getAccessToken()));
+    private Collection<? extends GrantedAuthority> getAuthorities(User user) {
+        return Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
     }
 }

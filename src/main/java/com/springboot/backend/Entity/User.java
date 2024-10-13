@@ -22,8 +22,6 @@ public class User {
     @Column(nullable = false)
     private String userName; // 사용자 이름
 
-    private boolean phoneVerified; // 휴대폰 번호 확인 여부
-
     @NotBlank(message = "비밀번호는 필수 항목입니다.")
     @Column(nullable = false)
     private String password; // 비밀번호
@@ -55,14 +53,6 @@ public class User {
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public boolean isPhoneVerified() {
-        return phoneVerified;
-    }
-
-    public void setPhoneVerified(boolean phoneVerified) {
-        this.phoneVerified = phoneVerified;
     }
 
     public String getPassword() {

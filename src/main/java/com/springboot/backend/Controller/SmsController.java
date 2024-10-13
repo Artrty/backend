@@ -3,8 +3,10 @@ package com.springboot.backend.Controller;
 import com.springboot.backend.Entity.Login;
 import com.springboot.backend.Entity.PhoneNumCertification;
 import com.springboot.backend.Entity.User;
+import com.springboot.backend.Jwt.JwtTokenProvider;
 import com.springboot.backend.Repository.UserRepository;
 import com.springboot.backend.Response.ApiResponse;
+import com.springboot.backend.Response.AuthResponse;
 import com.springboot.backend.Response.ErrorCode;
 import com.springboot.backend.Response.SuccessCode;
 import com.springboot.backend.Service.AuthService;
@@ -13,6 +15,7 @@ import com.springboot.backend.Service.SmsCertificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +40,9 @@ public class SmsController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     // 인증번호 발송
     @GetMapping("/{phoneNumber}/send-sms")
@@ -102,7 +108,7 @@ public class SmsController {
         // 입력 받은 비밀번호를 암호화
         String encryptedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encryptedPassword);// 암호화된 비밀번호 저장
-        user.setPhoneVerified(false); // 휴대폰 인증 여부를 초기값으로 설정
+//        user.setPhoneVerified(false); // 휴대폰 인증 여부를 초기값으로 설정
 
         // 사용자 정보 저장
         userRepository.save(user);
@@ -121,22 +127,24 @@ public class SmsController {
         return user;
     }
 
-    // 로그인
     @PostMapping("/signin")
     public ResponseEntity<ApiResponse<?>> signin(@RequestBody Login loginRequest) {
         System.out.println("로그인 진행");
-        ResponseEntity<?> authResponse = authService.signin(loginRequest);
+
+        // 사용자 인증 로직
+        Authentication authentication = authService.signin(loginRequest);
+
+        // 인증에 성공한 후 JWT 생성
+        String token = jwtTokenProvider.createToken(authentication).getAccessToken();
+
+        // AuthResponse 객체 생성
+        AuthResponse response = new AuthResponse();
+        response.setToken(token);
 
         Map<String, Object> data = new HashMap<>();
+        data.put("authResponse", response);
 
-        // authResponse.getBody()를 String으로 변환하여 메시지로 사용
-//        String message = authResponse.getBody() != null ? authResponse.getBody().toString() : "로그인 성공";
-
-        if (authResponse.getStatusCode() == HttpStatus.OK) { // 로그인 성공
-            return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.SigninSuccess, data));
-        } else { // 로그인 실패
-            return ResponseEntity.status(authResponse.getStatusCode())
-                    .body(ApiResponse.errorResponse(ErrorCode.LoginException));
-        }
+        System.out.println("로그인 성공");
+        return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.SigninSuccess, data));
     }
 }

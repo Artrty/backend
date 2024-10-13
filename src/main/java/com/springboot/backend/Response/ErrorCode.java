@@ -15,6 +15,7 @@ public enum ErrorCode {
     // 회원가입 및 로그인 관련 오류
     UserExistsException(409, "U001", "이미 존재하는 사용자입니다."),
     LoginException(401, "U002", "로그인 실패: 잘못된 자격 증명입니다."),
+    JwtCreationException(500, "U004", "JWT 생성 실패"),
 
     // 사용자 존재 여부 확인 오류 (db에 휴대폰 번호가 존재하지 않음)
     InvalidPhonenumException(404, "U003", "사용자 정보가 존재하지 않습니다.");

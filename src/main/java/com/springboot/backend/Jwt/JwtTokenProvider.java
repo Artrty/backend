@@ -30,6 +30,7 @@ public class JwtTokenProvider {
         this.secretKey = secretKey;
     }
 
+    // SecretKey 반환
     public SecretKey getKey() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
     }
@@ -37,6 +38,7 @@ public class JwtTokenProvider {
     // jwt token 생성
     public TokenInfo createToken(Authentication authentication) {
         System.out.println("jwt token 생성");
+
         // Authentication 객체에서 CustomUser를 가져옴
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
 
@@ -49,20 +51,27 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + EXPIRATION_TIME);
 
-        String jwt = Jwts.builder()
-                .setSubject(customUser.getUsername())
-                .claim("auth", authorities)
-                .claim("userId", customUser.getUserId())
-                .setIssuedAt(now)
-                .setExpiration(expiration)
-                .signWith(getKey(), SignatureAlgorithm.HS256)
-                .compact();
+        // JWT 생성
+        String jwt;
+        try {
+            jwt = Jwts.builder()
+                    .setSubject(customUser.getUsername()) // phoneNumber 사용
+                    .claim("auth", authorities)
+                    .claim("userId", customUser.getUserId())
+                    .setIssuedAt(now)
+                    .setExpiration(expiration)
+                    .signWith(getKey(), SignatureAlgorithm.HS256) // Key 서명
+                    .compact();
 
-        // JWT 생성 로그
-        logger.info("Generated JWT: {}", jwt);
+            System.out.println("JWT 토큰 생성 완료: " + jwt);
+        } catch (Exception e) {
+            System.out.println("JWT 생성 중 예외 발생: " + e.getMessage());
+            throw e; // 예외 다시 던짐
+        }
 
         return new TokenInfo("Bearer", jwt);
     }
+
 
 
     // jwt token에서 Authentication 정보 추출
