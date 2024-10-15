@@ -1,11 +1,17 @@
 package com.springboot.backend.Entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "sms_certification")
+@Getter @Setter
+@AllArgsConstructor @NoArgsConstructor
 public class PhoneNumCertification {
 
     @Id
@@ -28,46 +34,5 @@ public class PhoneNumCertification {
     public void regenerateVerifiedNumber(String newVerifiedNumber) {
         this.verifiedNumber = newVerifiedNumber;
         this.createdAt = LocalDateTime.now(); // 재발급 시 생성 시간 업데이트
-    }
-
-    // Getter 및 Setter
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getVerifiedNumber() {
-        return verifiedNumber;
-    }
-
-    public void setVerifiedNumber(String verifiedNumber) {
-        this.verifiedNumber = verifiedNumber;
-    }
-
-    public String getUserVerifiedNumber() {
-        return userVerifiedNumber;
-    }
-
-    public void setUserVerifiedNumber(String userVerifiedNumber) {
-        this.userVerifiedNumber = userVerifiedNumber;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

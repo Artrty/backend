@@ -2,11 +2,18 @@ package com.springboot.backend.Entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
+@Getter @Setter
+@AllArgsConstructor @NoArgsConstructor
 public class User {
 
     @Id
@@ -22,6 +29,9 @@ public class User {
     @Column(nullable = false)
     private String userName; // 사용자 이름
 
+    @OneToMany(mappedBy = "postWriter", fetch = FetchType.LAZY)
+    private List<EventBoard> eventBoards;  // 한 사용자가 작성한 여러 게시글
+
     @NotBlank(message = "비밀번호는 필수 항목입니다.")
     @Column(nullable = false)
     private String password; // 비밀번호
@@ -30,42 +40,4 @@ public class User {
     @Column(updatable = false) // 생성 후에는 업데이트되지 않도록 설정
     private LocalDateTime createdAt; // 계정 생성일 (자동 저장)
 
-    // Getter, Setter
-    public Long getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(Long uuid) {
-        this.uuid = uuid;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    // createdAt은 자동으로 설정되므로 setter는 제공하지 않음
 }
