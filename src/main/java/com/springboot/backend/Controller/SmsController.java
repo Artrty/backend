@@ -65,12 +65,12 @@ public class SmsController {
         System.out.println("인증번호 검증 엔드포인트");
         try {
             // SMS 인증 로직 실행
-            String result = smsCertificationService.verifySms(certificationDto);
+            ApiResponse<String> result = smsCertificationService.verifySms(certificationDto);
 
             Map<String, Object> data = new HashMap<>();
 
             // 인증 성공
-            if ("인증 완료되었습니다.".equals(result)) {
+            if ("인증 완료되었습니다.".equals(result.getData())) {
                 // 인증 성공한 사용자의 정보를 가져옴
                 User user = userRepository.findByPhoneNumber(certificationDto.getPhoneNumber());
 
