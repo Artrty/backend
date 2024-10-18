@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -45,15 +46,24 @@ public class CoolSmsService {
             JSONObject response = coolsms.send(params);
 
             if (response.containsKey("success_count") && ((Long) response.get("success_count")) > 0) {
-                System.out.println("기존에 발송된 인증번호 무효화(새로운 인증번호만 인증 가능)");
+                // 전화번호에 해당하는 기존 인증번호 레코드를 조회
+                Optional<PhoneNumCertification> existingCertification = phoneNumCertificationRepository.findByPhoneNumber(to);
 
-                // 새로운 인증번호 저장
-                PhoneNumCertification certification = new PhoneNumCertification();
-                certification.setPhoneNumber(to);
-                certification.setVerifiedNumber(numStr);
-                certification.setCreatedAt(LocalDateTime.now());
+                if (existingCertification.isPresent()) {
+                    // 이미 발송된 인증번호가 있으면 인증번호와 생성시간을 최신화
+                    PhoneNumCertification certification = existingCertification.get();
+                    certification.setVerifiedNumber(numStr); // 새로운 인증번호
+                    certification.setCreatedAt(LocalDateTime.now()); // 현재 시간으로 업데이트
+                    phoneNumCertificationRepository.save(certification); // DB에 업데이트
+                } else {
+                    // 기존에 발송된 인증번호가 없으면 새로 생성
+                    PhoneNumCertification certification = new PhoneNumCertification();
+                    certification.setPhoneNumber(to);
+                    certification.setVerifiedNumber(numStr);
+                    certification.setCreatedAt(LocalDateTime.now());
 
-                phoneNumCertificationRepository.save(certification);  // DB에 인증번호 저장
+                    phoneNumCertificationRepository.save(certification);  // DB에 저장
+                }
 
                 return numStr; // 생성된 인증번호 반환
             } else {

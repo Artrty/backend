@@ -14,6 +14,8 @@ public class Login {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 엔티티의 고유 ID
+
+    @Column(unique = true)
     private String phoneNumber;
     private String password;
 }
