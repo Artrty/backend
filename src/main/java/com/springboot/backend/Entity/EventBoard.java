@@ -31,7 +31,7 @@ public class EventBoard {
     @Column(nullable = false)
     private String eventDate; // 공연 일정
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2500)
     private String eventDescription; //공연 설명
 
     @Column
@@ -43,5 +43,9 @@ public class EventBoard {
 
     @CreationTimestamp
     private LocalDateTime postTime; // 게시글 작성 시간
+
+    public void setEventPosterUrl(String eventPosterUrl) {    // eventPosterUrl 접근자 메서드 추가
+        this.eventPosterUrl = eventPosterUrl;
+    }
 
 }
