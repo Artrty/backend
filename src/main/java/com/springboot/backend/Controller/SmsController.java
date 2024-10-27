@@ -11,6 +11,11 @@ import com.springboot.backend.Response.SuccessCode;
 import com.springboot.backend.Service.AuthService;
 import com.springboot.backend.Service.CoolSmsService;
 import com.springboot.backend.Service.SmsCertificationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +49,17 @@ public class SmsController {
 
     // 인증번호 발송
     @GetMapping("/{phoneNumber}/send-sms")
-    @ResponseBody
+    @Operation(summary = "Send SMS Code", description = "사용자의 전화번호로 SMS 인증번호를 발송합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "SMS 인증번호 발송 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = "{\"data\": null, \"message\": \"인증번호 발송 성공\", \"code\": \"S001\"}"))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "SMS 인증번호 발송 실패",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = "{\"data\": null, \"message\": \"SMS 전송 실패\", \"code\": \"S501\"}")))
+    })
     public ResponseEntity<ApiResponse<?>> sendSms(@PathVariable String phoneNumber) {
         System.out.println("SMS 인증번호 발송 시도: " + phoneNumber);
 
@@ -59,8 +74,27 @@ public class SmsController {
         }
     }
 
-    // 인증번호 검증 엔드포인트
+    // 인증번호 검증
     @PostMapping("/verify-sms")
+    @Operation(summary = "Verify SMS Code", description = "SMS 인증번호를 검증합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "인증 성공 또는 인증번호 만료",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = {
+                                    @ExampleObject(name = "인증 성공", value = "{\"data\": {\"user\": {\"id\": 123, \"name\": \"홍길동\", \"phoneNumber\": \"010-1234-5678\"}}, \"message\": \"인증번호 검증 완료\", \"code\": \"S002\"}"),
+                                    @ExampleObject(name = "인증 실패", value = "{\"data\": null, \"message\": \"인증 실패: 잘못된 인증번호입니다.\", \"code\": \"S003\"}")
+                            }
+                    )),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "인증 실패",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = "{\"data\": null, \"message\": \"인증번호 만료\", \"code\": \"S501\"}"))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "서버 오류로 인한 인증 실패",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = "{\"data\": null, \"message\": \"SMS 전송 실패\", \"code\": \"S503\"}")))
+    })
     public ResponseEntity<ApiResponse<?>> verifySms(@RequestBody PhoneNumCertification certificationDto) {
         System.out.println("인증번호 검증 엔드포인트");
         try {
@@ -83,9 +117,9 @@ public class SmsController {
             } else {
                 // 인증 실패
                 return ResponseEntity.badRequest()
-                        .body(ApiResponse.errorResponse(ErrorCode.SmsVerificationException));
+                        .body(ApiResponse.successResponse(SuccessCode.SmsVerificationException, null));
             }
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) { // 인증번호 만료
             return ResponseEntity.badRequest()
                     .body(ApiResponse.errorResponse(ErrorCode.SmsServerException));
         }
@@ -93,7 +127,17 @@ public class SmsController {
 
     // 회원가입
     @PostMapping("/signup")
-    @ResponseBody
+    @Operation(summary = "User Signup", description = "신규 사용자를 등록합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "회원가입 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = "{\"data\": {\"user\": {\"id\": 123, \"name\": \"홍길동\"}}, \"message\": \"사용자 정보 저장 성공\", \"code\": \"U001\"}"))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "이미 존재하는 사용자",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = "{\"data\": null, \"message\": \"이미 존재하는 사용자입니다.\", \"code\": \"U501\"}")))
+    })
     public ResponseEntity<ApiResponse<?>> signup(@RequestBody User user) {
         System.out.println("회원가입 진행");
         // 전화번호로 유저가 이미 존재하는지 확인
@@ -126,6 +170,17 @@ public class SmsController {
     }
 
     @PostMapping("/signin")
+    @Operation(summary = "User Signin", description = "로그인을 진행합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그인 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = "{\"data\": {\"token\": \"jwt-token\"}, \"message\": \"로그인 성공\", \"code\": \"U002\"}"))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인 실패",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = "{\"data\": null, \"message\": \"로그인 실패: 잘못된 자격 증명입니다.\", \"code\": \"U502\"}")))
+    })
     public ResponseEntity<ApiResponse<?>> signin(@RequestBody Login loginRequest) {
 
         // AuthService의 signin 메서드를 호출하고 결과 반환

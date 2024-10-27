@@ -10,6 +10,7 @@ public enum SuccessCode {
     // 인증 관련 성공 응답
     SmsSendSuccess(200, "S001", "인증번호 발송 성공"),
     SmsVerificationSuccess(200, "S002", "인증번호 검증 완료!"),
+    SmsVerificationException(200, "S003", "인증 실패: 잘못된 인증번호입니다."),
 
     // 회원가입 및 로그인 관련 성공 응답
     SignupSuccess(201, "U001", "사용자 정보 저장 성공!"),

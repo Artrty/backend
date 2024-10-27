@@ -56,7 +56,7 @@ public class SmsCertificationService {
             return (ApiResponse<String>) ApiResponse.successResponse(SuccessCode.SmsVerificationSuccess, "인증 완료되었습니다.");
         } else {
             // 인증번호가 일치하지 않을 경우
-            return (ApiResponse<String>) ApiResponse.errorResponse(ErrorCode.SmsVerificationException);
+            return (ApiResponse<String>) ApiResponse.successResponse(SuccessCode.SmsVerificationException, null);
         }
     }
 }
