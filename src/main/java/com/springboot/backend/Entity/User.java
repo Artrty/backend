@@ -29,8 +29,8 @@ public class User {
     @Column(nullable = false)
     private String userName; // 사용자 이름
 
-    @OneToMany(mappedBy = "postWriter", fetch = FetchType.LAZY)
-    private List<EventBoard> eventBoards;  // 한 사용자가 작성한 여러 게시글
+    @OneToMany(mappedBy = "postWriter", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<EventBoard> eventBoards;  // 한 사용자가 작성한 여러 게시글 / 해당 사용자가 삭제될 때 관련된 게시글도 함께 삭제
 
     @NotBlank(message = "비밀번호는 필수 항목입니다.")
     @Column(nullable = false)

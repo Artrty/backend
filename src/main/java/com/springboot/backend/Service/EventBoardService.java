@@ -21,7 +21,7 @@ public class EventBoardService {
     }
 
     @Transactional
-    public Long keepDiary(MultipartFile image, EventBoard eventBoard) throws IOException {
+    public Long keepEventBoard(MultipartFile image, EventBoard eventBoard) throws IOException {
         System.out.println("EventBoardService 실행");
         if(!image.isEmpty()) {
             String storedFileName = s3Uploader.upload(image, "images");

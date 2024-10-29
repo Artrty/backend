@@ -19,7 +19,11 @@ public enum SuccessCode {
     LoginUserNotFound(200, "U004", "로그인 실패: 회원 정보가 존재하지 않습니다."),
 
     // 사용자 존재 여부 확인 성공 응답 (db에 휴대폰 번호 존재)
-    ValidPhonenumSuccess(200, "U003", "사용자 정보가 존재합니다.");
+    ValidPhonenumSuccess(200, "U003", "사용자 정보가 존재합니다."),
+    
+    // 게시글 작성 성공 응답
+    EventBoardImageSuccess(200, "B001", "게시글 이미지 저장 성공"),
+    EventBoardSaveSuccess(200, "B002", "게시글 내용 저장 성공");
 
     private final int status;
     private final String code;
