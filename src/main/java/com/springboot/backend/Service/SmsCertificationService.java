@@ -22,6 +22,21 @@ public class SmsCertificationService {
     private final PhoneNumCertificationRepository phoneNumCertificationRepository;
     private final UserRepository userRepository;
 
+    // SMS 발송 가능 여부 확인 메서드
+    public boolean canSendSms(String phoneNumber) {
+        Optional<PhoneNumCertification> optionalCertification = phoneNumCertificationRepository.findByPhoneNumber(phoneNumber);
+
+        if (optionalCertification.isPresent()) {
+            PhoneNumCertification storedCertification = optionalCertification.get();
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime createdAt = storedCertification.getCreatedAt();
+
+            // 마지막 SMS가 발송된 시간이 3분 이내인지 체크
+            return Duration.between(createdAt, now).toMinutes() > 3;
+        }
+        return true; // 기록이 없으면 SMS 발송 가능
+    }
+
     // 인증번호 검증
     @Transactional
     public ApiResponse<String> verifySms(PhoneNumCertification requestDto) {

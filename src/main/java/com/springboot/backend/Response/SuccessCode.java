@@ -11,6 +11,7 @@ public enum SuccessCode {
     SmsSendSuccess(200, "S001", "인증번호 발송 성공"),
     SmsVerificationSuccess(200, "S002", "인증번호 검증 완료!"),
     SmsVerificationException(200, "S003", "인증 실패: 잘못된 인증번호입니다."),
+    SmsVerificationResendNotice(200, "S004", "인증번호 재전송 불가: 이전 요청으로부터 3분 후 재시도해 주시기 바랍니다."),
 
     // 회원가입 및 로그인 관련 성공 응답
     SignupSuccess(201, "U001", "사용자 정보 저장 성공!"),
@@ -23,10 +24,14 @@ public enum SuccessCode {
     
     // 게시글 작성 성공 응답
     EventBoardImageSuccess(200, "B001", "게시글 이미지 저장 성공"),
-    EventBoardSaveSuccess(200, "B002", "게시글 내용 저장 성공");
+    EventBoardSaveSuccess(200, "B002", "게시글 저장 성공 : 관리자의 승인이 필요합니다."),
+    ImageFileSizeCheckSuccess(200, "B003", "이미지 파일 용량 체크 성공"),
+    ImageCountCheckSuccess(200, "B004", "이미지 개수 체크 성공"),
+
+    // 게시글 조회 성공 응답
+    EventBoardLoadSuccess(200, "B005", "게시글 데이터 불러오기 성공");
 
     private final int status;
     private final String code;
     private final String message;
-
 }

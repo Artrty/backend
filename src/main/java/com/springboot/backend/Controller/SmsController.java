@@ -55,6 +55,10 @@ public class SmsController {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiResponse.class),
                             examples = @ExampleObject(value = "{\"data\": null, \"message\": \"인증번호 발송 성공\", \"code\": \"S001\"}"))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "인증번호 재발송 불가",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = "{\"data\": null, \"message\": \"인증번호 재발송은 3분 후에 가능합니다.\", \"code\": \"S502\"}"))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "SMS 인증번호 발송 실패",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ApiResponse.class),
@@ -63,14 +67,19 @@ public class SmsController {
     public ResponseEntity<ApiResponse<?>> sendSms(@PathVariable String phoneNumber) {
         System.out.println("SMS 인증번호 발송 시도: " + phoneNumber);
 
-        // SMS 인증번호 발송
-        try {
-            String randomNumber = coolSmsService.sendSms(phoneNumber);
-            System.out.println("SMS 인증번호 발송 성공: " + randomNumber);
-            return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.SmsSendSuccess, null));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.errorResponse(ErrorCode.SmsSendException));
+        // SMS 재발송 가능 여부 체크
+        if (smsCertificationService.canSendSms(phoneNumber)) {
+            try {
+                String randomNumber = coolSmsService.sendSms(phoneNumber);
+                System.out.println("SMS 인증번호 발송 성공: " + randomNumber);
+                return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.SmsSendSuccess, null));
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(ApiResponse.errorResponse(ErrorCode.SmsSendException));
+            }
+        } else { // 인증번호 재발송 대기 메세지 출력
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.successResponse(SuccessCode.SmsVerificationResendNotice, null));
         }
     }
 
@@ -150,7 +159,6 @@ public class SmsController {
         // 입력 받은 비밀번호를 암호화
         String encryptedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encryptedPassword);// 암호화된 비밀번호 저장
-//        user.setPhoneVerified(false); // 휴대폰 인증 여부를 초기값으로 설정
 
         // 사용자 정보 저장
         userRepository.save(user);
