@@ -92,5 +92,10 @@ public class EventController {
                     .body(ApiResponse.errorResponse(ErrorCode.EventBoardLoadException));
         }
     }
+    
+    // 게시글 수정
+    
+    
+    // 게시글 삭제
 
 }

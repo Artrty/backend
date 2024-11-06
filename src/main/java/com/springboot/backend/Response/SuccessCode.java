@@ -21,15 +21,19 @@ public enum SuccessCode {
 
     // 사용자 존재 여부 확인 성공 응답 (db에 휴대폰 번호 존재)
     ValidPhonenumSuccess(200, "U003", "사용자 정보가 존재합니다."),
-    
+
     // 게시글 작성 성공 응답
     EventBoardImageSuccess(200, "B001", "게시글 이미지 저장 성공"),
     EventBoardSaveSuccess(200, "B002", "게시글 저장 성공 : 관리자의 승인이 필요합니다."),
     ImageFileSizeCheckSuccess(200, "B003", "이미지 파일 용량 체크 성공"),
     ImageCountCheckSuccess(200, "B004", "이미지 개수 체크 성공"),
+    ImageFileSizeExceeded(200, "B005", "이미지 재업로드 요청 : 이미지 파일 크기 초과"),
+    ImageNumEsceeded(200, "B006", "이미지 재업로드 요청 : 이미지 개수 초과"),
 
-    // 게시글 조회 성공 응답
-    EventBoardLoadSuccess(200, "B005", "게시글 데이터 불러오기 성공");
+    // 게시글 조회, 수정, 삭제 성공 응답
+    EventBoardLoadSuccess(200, "B005", "게시글 조회 성공"),
+    EventBoardEditSuccess(200, "B006", "게시글 수정 성공"),
+    EventBoardDeleteSuccess(200, "B007", "게시글 삭제 성공");
 
     private final int status;
     private final String code;
