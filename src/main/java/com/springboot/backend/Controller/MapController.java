@@ -48,7 +48,7 @@ public class MapController {
 
     // 장소를 검색하는 메서드
     private List<Map<String, String>> searchPlace(String query) {
-        List<Map<String, String>> restaurants = new ArrayList<>();
+        List<Map<String, String>> places = new ArrayList<>();
 
         try {
             // UTF-8로 인코딩된 검색어 생성
@@ -73,9 +73,9 @@ public class MapController {
             // 검색 결과 중에서 장소 정보를 추출하여 리스트에 저장
             JsonNode itemsNode = rootNode.path("items");
             for (JsonNode itemNode : itemsNode) {
-                Map<String, String> restaurant = new HashMap<>();
-                restaurant.put("title", itemNode.path("title").asText()); // 장소 이름
-                restaurant.put("address", itemNode.path("address").asText()); // 장소 주소
+                Map<String, String> place = new HashMap<>();
+                place.put("title", itemNode.path("title").asText()); // 장소 이름
+                place.put("address", itemNode.path("address").asText()); // 장소 주소
                 /*
                  * restaurant.put("mapx", itemNode.path("mapx").asText());
                  * restaurant.put("mapy", itemNode.path("mapy").asText());
@@ -83,16 +83,16 @@ public class MapController {
                 // 위도와 경도를 double 형식으로 변환하여 저장
                 double latitude = Double.parseDouble(itemNode.path("mapy").asText()) / 1e7; // 위도
                 double longitude = Double.parseDouble(itemNode.path("mapx").asText()) / 1e7; // 경도
-                restaurant.put("latitude", String.valueOf(latitude));
-                restaurant.put("longitude", String.valueOf(longitude));
+                place.put("latitude", String.valueOf(latitude));
+                place.put("longitude", String.valueOf(longitude));
 
-                restaurants.add(restaurant); // 리스트에 추가
+                places.add(place); // 리스트에 추가
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return restaurants;
+        return places;
     }
 
 

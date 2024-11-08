@@ -101,8 +101,18 @@ public class EventController {
     }
     
     // 게시글 수정
+    @PostMapping(value = "/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "=", description = "게시글을 수정합니다.")
+    public ResponseEntity<ApiResponse<?>> editEventById(@PathVariable Long id) {
+        return null;
+    };
     
     
     // 게시글 삭제
+    @PostMapping(value = "/delete", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "=", description = "게시글을 삭제합니다")
+        public ResponseEntity<ApiResponse<?>> deleteEventById(@PathVariable Long id) {
+        return null;
+    };
 
 }
