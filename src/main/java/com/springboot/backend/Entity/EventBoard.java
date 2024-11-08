@@ -27,7 +27,10 @@ public class EventBoard {
 
     @NotBlank(message = "공연 장소는 필수로 입력해야 합니다.")
     @Column(nullable = false)
-    private String eventLocation; // 공연 장소 (위치)
+    private String eventLocation; // 공연 장소 (간단한 위치)
+
+    @Column
+    private String eventAddress; // 공연 장소 (도로명)
 
     @NotBlank(message = "공연 일정은 필수로 입력해야 합니다.")
     @Column(nullable = false)

@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -58,6 +59,12 @@ public class EventController {
         data.put("savedEventBoardId", savedEventBoardId);
 
         return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardSaveSuccess, data));
+    }
+
+    // 네이버 지도 검색
+    @GetMapping("/map")
+    public String map(Model model) {
+        return  null;
     }
 
     // 게시글 조회
