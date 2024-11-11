@@ -25,7 +25,7 @@ public enum ErrorCode {
     FileDeletionFailedException(500, "B502", "게시글 이미지 삭제 실패: 임시로 저장된 이미지 파일 삭제 실패"),
     FileConversionFailedException(500, "B503", "파일 변환 실패: MultipartFile -> File 전환 실패"),
 
-    // 게시글 조회 오류 응답
+    // 게시글 조회, 수정, 삭제 오류 응답
     EventBoardLoadException(404, "B504", "게시글 조회 실패 : 해당 ID에 대한 게시물 데이터가 존재하지 않습니다.");
     
     private final int status;

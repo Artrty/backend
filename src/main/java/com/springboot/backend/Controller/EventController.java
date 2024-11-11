@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -47,7 +48,7 @@ public class EventController {
     })
     public ResponseEntity<ApiResponse<?>> postEvent(
             HttpServletRequest request,
-            @RequestParam(value = "image") MultipartFile image,
+            @RequestParam(value = "image", required = false) MultipartFile image,
             @ModelAttribute EventBoard eventBoard) throws IOException {
         System.out.println("EventController 진행");
         System.out.println(image);
@@ -61,15 +62,9 @@ public class EventController {
         return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardSaveSuccess, data));
     }
 
-    // 네이버 지도 검색
-    @GetMapping("/map")
-    public String map(Model model) {
-        return  null;
-    }
-
-    // 게시글 조회
+    // 특정 게시글 상세 조회
     @GetMapping("/{id}")
-    @Operation(summary = "Get an event post by ID", description = "ID를 사용하여 게시글을 조회합니다.")
+    @Operation(summary = "Get an event post by ID", description = "ID를 사용하여 특정 게시글을 조회합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 조회 성공",
                     content = @Content(mediaType = "application/json",
@@ -99,20 +94,68 @@ public class EventController {
                     .body(ApiResponse.errorResponse(ErrorCode.EventBoardLoadException));
         }
     }
-    
-    // 게시글 수정
-    @PostMapping(value = "/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "=", description = "게시글을 수정합니다.")
-    public ResponseEntity<ApiResponse<?>> editEventById(@PathVariable Long id) {
-        return null;
+
+    // 전체 게시글 조회
+    @GetMapping(value = "/viewAll")
+    @Operation(summary = "Show all events", description = "모든 게시글을 조회합니다 조회합니다.")
+    public ResponseEntity<ApiResponse<?>> viewAll() {
+        List<EventBoard> eventBoard = eventBoardRepository.findAll();
+        Map<String, Object> data = new HashMap<>();
+        data.put("eventBoard", eventBoard);
+        return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardAllLoadSuccess, data));
     };
     
-    
+    // 게시글 수정
+    @PutMapping(value = "/{id}/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Edit event post", description = "게시글을 수정합니다.")
+    public ResponseEntity<ApiResponse<?>> editEventById(
+            @PathVariable Long id,
+            @RequestParam(required = false) String eventTitle,
+            @RequestParam(required = false) String eventLocation,
+            @RequestParam(required = false) String eventAddress,
+            @RequestParam(required = false) String eventDate,
+            @RequestParam(required = false) String eventDescription,
+            @RequestParam(required = false) String precautions,
+            @RequestParam(required = false) String eventInfoLink,
+            @RequestParam(required = false) String eventPosterUrl) {
+
+        // ID로 기존 게시글 조회
+        EventBoard existingEventBoard = eventBoardRepository.findById(id).orElse(null);
+
+        if (existingEventBoard != null) {
+            // 전달된 값이 null이 아닌 경우에만 필드 업데이트
+            if (eventTitle != null) existingEventBoard.setEventTitle(eventTitle);
+            if (eventLocation != null) existingEventBoard.setEventLocation(eventLocation);
+            if (eventAddress != null) existingEventBoard.setEventAddress(eventAddress);
+            if (eventDate != null) existingEventBoard.setEventDate(eventDate);
+            if (eventDescription != null) existingEventBoard.setEventDescription(eventDescription);
+            if (precautions != null) existingEventBoard.setPrecautions(precautions);
+            if (eventInfoLink != null) existingEventBoard.setEventInfoLink(eventInfoLink);
+            if (eventPosterUrl != null) existingEventBoard.setEventPosterUrl(eventPosterUrl);
+
+            // 저장 후 응답 데이터 구성
+            EventBoard savedEventBoard = eventBoardRepository.save(existingEventBoard);
+            Map<String, Object> data = new HashMap<>();
+            data.put("eventBoard", savedEventBoard);
+
+            // 성공 응답 반환
+            return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardUpdateSuccess, data));
+        } else {
+            return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardUpdateFailed, null));
+        }
+    }
+
     // 게시글 삭제
-    @PostMapping(value = "/delete", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "=", description = "게시글을 삭제합니다")
-        public ResponseEntity<ApiResponse<?>> deleteEventById(@PathVariable Long id) {
-        return null;
+    @DeleteMapping(value = "/{id}/delete")
+    @Operation(summary = "Delete event post", description = "게시글을 삭제합니다")
+    public ResponseEntity<ApiResponse<?>> deleteEventById(@PathVariable Long id) {
+        EventBoard eventBoard = eventBoardRepository.findById(id).orElse(null);
+        if (eventBoard != null) {
+            eventBoardRepository.delete(eventBoard);
+            return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardDeleteSuccess, null));
+        } else {
+            return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardDeleteFailed, null));
+        }
     };
 
 }

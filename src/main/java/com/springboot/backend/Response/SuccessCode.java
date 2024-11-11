@@ -32,8 +32,12 @@ public enum SuccessCode {
 
     // 게시글 조회, 수정, 삭제 성공 응답
     EventBoardLoadSuccess(200, "B005", "게시글 조회 성공"),
-    EventBoardEditSuccess(200, "B006", "게시글 수정 성공"),
-    EventBoardDeleteSuccess(200, "B007", "게시글 삭제 성공");
+    EventBoardUpdateSuccess(200, "B006", "게시글 수정 성공"),
+    EventBoardUpdateFailed(200, "B007", "게시글 수정 실패 : 해당 ID에 대한 게시물이 존재하지 않음"),
+    // 수정된 내용이 없습니다
+    EventBoardDeleteSuccess(200, "B009", "게시글 삭제 성공"),
+    EventBoardDeleteFailed(200, "B010", "게시글 삭제 실패 : 해당 ID에 대한 게시물이 존재하지 않음"),
+    EventBoardAllLoadSuccess(200, "B011", "전체 게시글 조회 성공");
 
     private final int status;
     private final String code;
