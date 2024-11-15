@@ -11,21 +11,22 @@ import java.io.IOException;
 
 @Service
 public class EventBoardService {
-    private final EventBoardRepository eventBoardRepository; // 이름을 소문자로 수정
+    private final EventBoardRepository eventBoardRepository;
 
     @Autowired
     private S3Uploader s3Uploader;
 
     public EventBoardService(EventBoardRepository eventBoardRepository) {
-        this.eventBoardRepository = eventBoardRepository; // 이름을 소문자로 수정
+        this.eventBoardRepository = eventBoardRepository;
     }
 
     @Transactional
     public Long keepEventBoard(MultipartFile image, EventBoard eventBoard) throws IOException {
         System.out.println("EventBoardService 실행");
-        if(!image.isEmpty()) {
+        
+        if (image != null && !image.isEmpty()) { // 이미지가 null혹은 비어있지 않을 경우
             String storedFileName = s3Uploader.upload(image, "images");
-            eventBoard.setEventPosterUrl(storedFileName); // 수정된 메서드 사용
+            eventBoard.setEventPosterUrl(storedFileName);
         }
         EventBoard saveEventBoard = eventBoardRepository.save(eventBoard);
         return saveEventBoard.getId();

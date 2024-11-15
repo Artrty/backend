@@ -6,13 +6,14 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "event_board")
 @Builder
 @Getter @Setter
 @AllArgsConstructor @NoArgsConstructor
-public class EventBoard {
+public class EventBoard { // 공연 게시글 작성
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,9 +22,6 @@ public class EventBoard {
     @NotBlank(message = "공연 제목은 필수로 입력해야 합니다.")
     @Column(nullable = false)
     private String eventTitle; // 공연 제목
-
-//    @Column(nullable = false)
-//    private String eventArea; // 공연 지역
 
     @NotBlank(message = "공연 장소는 필수로 입력해야 합니다.")
     @Column(nullable = false)
@@ -44,6 +42,9 @@ public class EventBoard {
     private String precautions; // 공연 유의 사항 및 예매 방법 안내
 
     @Column
+    private String paymentInfo; // 예매 정보 (결제 관련 정보)
+
+    @Column
     private String eventInfoLink; // 공연 정보 링크
 
     @Column
@@ -60,4 +61,6 @@ public class EventBoard {
         this.eventPosterUrl = eventPosterUrl;
     }
 
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<EventReservation> reservations; // 해당 공연의 예약 목록
 }
