@@ -26,7 +26,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/event-board")
-public class EventController {
+public class EventController { // 공연 게시글 작성 및 조회
 
     private final EventBoardService eventBoardService;
     private final EventBoardRepository eventBoardRepository;
@@ -61,8 +61,10 @@ public class EventController {
 
         return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardSaveSuccess, data));
     }
+    
+    // 관리자의 승인을 부여하는 api
 
-    // 특정 게시글 상세 조회
+    // 특정 게시글 상세 조회 (관리자의 승인을 받은 게시글만 조회 가능)
     @GetMapping("/{id}")
     @Operation(summary = "Get an event post by ID", description = "ID를 사용하여 특정 게시글을 조회합니다.")
     @ApiResponses({
@@ -76,9 +78,11 @@ public class EventController {
                             examples = @ExampleObject(value = "{\"data\": null, \"message\": \"게시글 조회 실패 : 해당 ID에 대한 게시물 데이터가 존재하지 않습니다.\", \"code\": \"B004\"}")))
     })
     public ResponseEntity<ApiResponse<?>> getEventById(@PathVariable Long id) {
-        // ID로 EventBoard 데이터베이스 조회
-        EventBoard eventBoard = eventBoardRepository.findById(id).orElse(null);
+
         System.out.println("게시글 ID를 통한 해당 게시글 존재 여부 확인");
+
+        // 관리자의 게시글 승인 여부 확인
+        EventBoard eventBoard = eventBoardService.getApprovedEventById(id);
         // 게시글 존재 여부 확인
         if (eventBoard != null) {
             // 게시글이 존재하는 경우 Map에 데이터를 넣어 응답
@@ -95,15 +99,15 @@ public class EventController {
         }
     }
 
-    // 전체 게시글 조회
+    // 전체 게시글 조회 (관리자의 승인을 받은 게시글만 조회 가능)
     @GetMapping(value = "/viewAll")
     @Operation(summary = "Show all events", description = "모든 게시글을 조회합니다 조회합니다.")
     public ResponseEntity<ApiResponse<?>> viewAll() {
-        List<EventBoard> eventBoard = eventBoardRepository.findAll();
+        List<EventBoard> eventBoards = eventBoardService.getAllApprovedEvents();
         Map<String, Object> data = new HashMap<>();
-        data.put("eventBoard", eventBoard);
+        data.put("eventBoard", eventBoards);
         return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardAllLoadSuccess, data));
-    };
+    }
     
     // 게시글 수정
     @PutMapping(value = "/{id}/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

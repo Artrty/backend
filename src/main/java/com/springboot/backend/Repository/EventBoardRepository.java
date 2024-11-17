@@ -9,4 +9,10 @@ import java.util.List;
 @Repository
 public interface EventBoardRepository extends JpaRepository<EventBoard, Long> {
     List<EventBoard> findByEventTitle(String title); // 공연 제목으로 검색
+
+    // ID로 관리자 승인된 게시글 조회
+    EventBoard findByIdAndApprovalStatusTrue(Long id);
+
+    // 관리자 승인된 모든 게시글 조회
+    List<EventBoard> findAllByApprovalStatusTrue();
 }

@@ -57,6 +57,9 @@ public class EventBoard { // 공연 게시글 작성
     @CreationTimestamp
     private LocalDateTime postTime; // 게시글 작성 시간
 
+    @Column
+    private boolean approvalStatus; // 관리자의 게시글 승인 여부 boolean
+
     public void setEventPosterUrl(String eventPosterUrl) {    // eventPosterUrl 접근자 메서드 추가
         this.eventPosterUrl = eventPosterUrl;
     }

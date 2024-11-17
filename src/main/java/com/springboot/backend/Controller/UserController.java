@@ -26,7 +26,6 @@ public class UserController {
 
     // 전화번호로 유저 존재 여부 확인
     @GetMapping("/{phoneNumber}/valid")
-
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "사용자 정보 존재",
                     content = @Content(mediaType = "application/json",
