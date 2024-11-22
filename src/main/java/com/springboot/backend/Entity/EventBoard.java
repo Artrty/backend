@@ -1,5 +1,6 @@
 package com.springboot.backend.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -65,5 +66,7 @@ public class EventBoard { // 공연 게시글 작성
     }
 
     @OneToMany(mappedBy = "event", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @JsonIgnore
     private List<EventReservation> reservations; // 해당 공연의 예약 목록
+
 }

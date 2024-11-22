@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
@@ -61,8 +62,35 @@ public class EventController { // 공연 게시글 작성 및 조회
 
         return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardSaveSuccess, data));
     }
-    
-    // 관리자의 승인을 부여하는 api
+
+    // 관리자의 승인을 부여하는 API
+    @PutMapping("/{id}/approve")
+    @Operation(summary = "Approve an event post", description = "관리자가 특정 게시글을 승인합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "게시글 승인 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = "{\"data\": {\"approvedEvent\": {\"id\": 1, \"title\": \"Sample Title\"}}, \"message\": \"관리자의 게시글 승인 완료\", \"code\": \"B012\"}"))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "게시글 승인 실패",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ApiResponse.class),
+                            examples = @ExampleObject(value = "{\"data\": null, \"message\": \"게시글 승인 실패 : 해당 ID에 대한 게시물을 찾을 수 없습니다.\", \"code\": \"B013\"}")))
+    })
+    public ResponseEntity<ApiResponse<?>> approval(@PathVariable Long id) {
+        EventBoard approvedEvent = eventBoardService.approveEvent(id);
+
+        if (approvedEvent != null) {
+            // 승인된 게시글 데이터를 포함한 응답
+            Map<String, Object> data = new HashMap<>();
+            data.put("approvedEvent", approvedEvent);
+            return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardApproval, data));
+        } else {
+            // 게시글 승인 실패 응답
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.successResponse(SuccessCode.EventBoardApprovalError, null));
+        }
+    }
+
 
     // 특정 게시글 상세 조회 (관리자의 승인을 받은 게시글만 조회 가능)
     @GetMapping("/{id}")
@@ -83,6 +111,7 @@ public class EventController { // 공연 게시글 작성 및 조회
 
         // 관리자의 게시글 승인 여부 확인
         EventBoard eventBoard = eventBoardService.getApprovedEventById(id);
+
         // 게시글 존재 여부 확인
         if (eventBoard != null) {
             // 게시글이 존재하는 경우 Map에 데이터를 넣어 응답
@@ -107,8 +136,9 @@ public class EventController { // 공연 게시글 작성 및 조회
         Map<String, Object> data = new HashMap<>();
         data.put("eventBoard", eventBoards);
         return ResponseEntity.ok(ApiResponse.successResponse(SuccessCode.EventBoardAllLoadSuccess, data));
+        // 전체 게시글 조회 시 게시글이 존재하지 않을 경우
     }
-    
+
     // 게시글 수정
     @PutMapping(value = "/{id}/edit", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Edit event post", description = "게시글을 수정합니다.")

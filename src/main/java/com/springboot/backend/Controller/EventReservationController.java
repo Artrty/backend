@@ -40,7 +40,7 @@ public class EventReservationController {
         }
     }
 
-    // 사용자 ID에 대한 공연 예약 정보 조회 API
+    // 사용자 ID에 대한 공연 예약 정보 조회 API (예약 신청 상태)
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<?>> getReservationsByUser(@PathVariable Long userId) {
         try {
@@ -61,6 +61,9 @@ public class EventReservationController {
                 ApiResponse.errorResponse(errorCode)
         );
     }
+
+    // 사용자 ID에 대한 공연 예약 정보 조회 API (예약 완료 상태)
+
 }
 
 

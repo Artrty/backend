@@ -39,13 +39,16 @@ public enum SuccessCode {
     EventBoardDeleteFailed(200, "B010", "게시글 삭제 실패 : 해당 ID에 대한 게시물이 존재하지 않음"),
     EventBoardAllLoadSuccess(200, "B011", "전체 게시글 조회 성공"),
 
+    // 게시글 관리자 승인 응답
+    EventBoardApproval(200, "B012", "관리자의 게시글 등록 승인 : 게시글 조회 가능"),
+    EventBoardApprovalError(200, "B013", "게시글 승인 실패 : 해당 ID에 해당하는 게시글을 찾을 수 없음"),
+
     // 공연 예약 응답
     ReservationSuccess(201, "R001", "공연 예약 성공"),
     // 이미 예약 성공한 공연 (중복 예약 공연일 경우)
 
     // 공연 예약 정보 조회 응답
     ReservationInfoLoadSuccess(200, "R002", "예약 정보 조회 성공");
-
 
 
     private final int status;
