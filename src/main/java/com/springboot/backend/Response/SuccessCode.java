@@ -45,10 +45,10 @@ public enum SuccessCode {
 
     // 공연 예약 응답
     ReservationSuccess(201, "R001", "공연 예약 성공"),
-    // 이미 예약 성공한 공연 (중복 예약 공연일 경우)
+    ReservationDuplicate(201, "R002", "이미 해당 공연에 예약이 존재합니다."),
 
     // 공연 예약 정보 조회 응답
-    ReservationInfoLoadSuccess(200, "R002", "예약 정보 조회 성공");
+    ReservationInfoLoadSuccess(200, "R003", "예약 정보 조회 성공");
 
 
     private final int status;

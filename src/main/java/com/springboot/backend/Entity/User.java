@@ -41,7 +41,7 @@ public class User {
     private List<EventBoard> eventBoards;  // 한 사용자가 작성한 여러 게시글 / 해당 사용자가 삭제될 때 관련된 게시글도 함께 삭제
 
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     private List<EventReservation> reservations; // 사용자의 공연 예약 목록
 
 }

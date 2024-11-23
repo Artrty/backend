@@ -1,6 +1,9 @@
 package com.springboot.backend.Controller;
 
+import com.springboot.backend.Dto.EventReservationRequest;
+import com.springboot.backend.Entity.EventBoard;
 import com.springboot.backend.Entity.EventReservation;
+import com.springboot.backend.Entity.User;
 import com.springboot.backend.Response.ApiResponse;
 import com.springboot.backend.Response.ErrorCode;
 import com.springboot.backend.Response.Exception.EventBoardLoadException;
@@ -22,23 +25,29 @@ public class EventReservationController {
     private final EventReservationService eventReservationService;
 
     // 공연 예약 신청 API
-    @PostMapping("/info")
-    public ResponseEntity<ApiResponse<?>> postEventReservation(@RequestBody EventReservation reservation) {
-        try { // 예약 성공
-            EventReservation createdReservation = eventReservationService.createReservation(reservation);
+    @PostMapping("/{id}/reserve")
+    public ResponseEntity<ApiResponse<?>> postEventReservation(@PathVariable Long id, @RequestBody EventReservationRequest request) {
+        System.out.println("공연 예약 시작");
+        try {
+            EventReservation reservation = new EventReservation();
+            reservation.setPaymentStatus(request.isPaymentStatus());
+            reservation.setRsvConfirmed(request.isRsvConfirmed());
+            reservation.setRsvCanceled(request.isRsvCanceled());
+
+            EventReservation createdReservation = eventReservationService.createReservationByEventId(id, request.getUserId(), reservation);
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     ApiResponse.successResponse(SuccessCode.ReservationSuccess, createdReservation)
             );
-//        } catch (InvalidPhonenumException e) { // 예약 실패 - 사용자 조회 실패
-//            return buildErrorResponse(ErrorCode.ReservationUserNotFound);
-//        } catch (EventBoardLoadException e) { // 예약 실패 - 이벤트 조회 실패
-//            return buildErrorResponse(ErrorCode.ReservationEventNotFound);
-//        } catch (IllegalArgumentException e) { // 예약 실패 - 중복 예약(이미 예약된 경우)
-//            return buildErrorResponse(ErrorCode.ReservationEventNotFound);
+        } catch (IllegalArgumentException e) { // 예약 실패 - 사용자 조회 실패
+            return buildErrorResponse(ErrorCode.ReservationUserNotFound);
+        // 예약 실패 - 중복 예약(이미 예약된 경우)
         } catch (Exception e) { // 예약 실패 - 서버 오류
+            e.printStackTrace();
             return buildErrorResponse(ErrorCode.ReservationServerError);
         }
     }
+
+
 
     // 사용자 ID에 대한 공연 예약 정보 조회 API (예약 신청 상태)
     @GetMapping("/{userId}")

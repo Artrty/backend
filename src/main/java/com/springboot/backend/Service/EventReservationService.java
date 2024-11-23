@@ -7,6 +7,7 @@ import com.springboot.backend.Repository.EventBoardRepository;
 import com.springboot.backend.Repository.EventReservationRepository;
 import com.springboot.backend.Repository.UserRepository;
 import com.springboot.backend.Response.ErrorCode;
+import com.springboot.backend.Response.SuccessCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,26 +22,34 @@ public class EventReservationService {
     private final UserRepository userRepository;
     private final EventBoardRepository eventBoardRepository;
 
-    // 공연 예약 생성
-    public EventReservation createReservation(EventReservation reservation) {
-        User user = userRepository.findById(reservation.getUser().getUuid()) // 공연 예약 실패 - 사용자 조회 실패
-                .orElseThrow(() -> new IllegalArgumentException(ErrorCode.ReservationUserNotFound.getMessage()));
+    // 공연 예약 생성 (EventBoard ID 사용)
+    public EventReservation createReservationByEventId(Long eventId, Long userId, EventReservation reservation) {
+        System.out.println("공연 예약 생성");
 
-        EventBoard event = eventBoardRepository.findById(reservation.getEvent().getId())  // 공연 예약 실패 - 해당 공연 id 조회 실패
+        if (eventId == null || userId == null) {
+            throw new IllegalArgumentException();
+        }
+
+        EventBoard event = eventBoardRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException(ErrorCode.ReservationEventNotFound.getMessage()));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorCode.ReservationUserNotFound.getMessage()));
 
         // 중복 예약 체크
         boolean isDuplicate = eventReservationRepository.findByUser(user).stream()
                 .anyMatch(existingReservation -> existingReservation.getEvent().getId().equals(event.getId()) && !existingReservation.isRsvCanceled());
         if (isDuplicate) {
-            throw new IllegalArgumentException(ErrorCode.ReservationEventNotFound.getMessage());
+            throw new IllegalArgumentException(SuccessCode.ReservationDuplicate.getMessage());
         }
 
-        reservation.setUser(user);
+        // 예약 생성
         reservation.setEvent(event);
+//        reservation.setUser(user);
         reservation.setRsvTime(LocalDateTime.now());
-        reservation.setRsvConfirmed(false); // 초기값 설정
-        reservation.setRsvCanceled(false); // 초기값 설정
+        reservation.setPaymentStatus(false);
+        reservation.setRsvConfirmed(false);
+        reservation.setRsvCanceled(false);
 
         return eventReservationRepository.save(reservation);
     }
